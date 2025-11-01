@@ -1,0 +1,10 @@
+{
+  "name": "@healt-care/client-e2e",
+  "version": "0.0.1",
+  "private": true,
+  "nx": {
+    "implicitDependencies": [
+      "@healt-care/client"
+    ]
+  }
+}
