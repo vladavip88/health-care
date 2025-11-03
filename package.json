@@ -6,6 +6,8 @@
   "private": true,
   "dependencies": {
     "@apollo/server": "^5.1.0",
+    "@graphql-tools/schema": "^10.0.26",
+    "@graphql-tools/utils": "^10.10.0",
     "@prisma/client": "^6.18.0",
     "body-parser": "^2.2.0",
     "cors": "^2.8.5",

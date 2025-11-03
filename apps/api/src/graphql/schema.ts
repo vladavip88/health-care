@@ -22,8 +22,8 @@ export const typeDefs = gql`
   }
 
   type Query {
-    users: [User!]!
-    user(id: ID!): User
+    users: [User!]! @auth @hasRole(roles: ["CLINIC_ADMIN"])
+    user(id: ID!): User @auth
   }
 
   type Mutation {
@@ -35,7 +35,7 @@ export const typeDefs = gql`
       phone: String
       role: Role!
       clinicId: String!
-    ): User!
+    ): User! @auth @hasRole(roles: ["CLINIC_ADMIN"])
 
     updateUser(
       id: ID!
@@ -43,8 +43,8 @@ export const typeDefs = gql`
       lastName: String
       phone: String
       active: Boolean
-    ): User!
+    ): User! @auth @hasRole(roles: ["CLINIC_ADMIN"])
 
-    deleteUser(id: ID!): User!
+    deleteUser(id: ID!): User! @auth @hasRole(roles: ["CLINIC_ADMIN"])
   }
 `;
