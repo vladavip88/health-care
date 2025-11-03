@@ -6,7 +6,6 @@
 
 generator client {
   provider = "prisma-client-js"
-  output   = "../src/generated/prisma"
 }
 
 datasource db {
@@ -14,18 +13,342 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// Example models for a healthcare system
-model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  name      String?
-  role      UserRole @default(PATIENT)
+model Clinic {
+  id        String  @id @default(cuid())
+  name      String
+  legalName String? // ako treba pravno ime ili naziv u fakturama
+  email     String? // kontakt email klinike
+  phone     String?
+  address   String?
+  city      String?
+  country   String? @default("RS")
+  timezone  String  @default("Europe/Belgrade")
+
+  subscriptionPlan   String? // npr. "starter", "pro", "business"
+  subscriptionStatus String? // "active" | "trial" | "canceled"
+  subscriptionUntil  DateTime? // datum isteka pretplate
+
+  website String?
+  logoUrl String?
+
+  // meta
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  // relations
+  assistants    Assistant[]
+  doctors       Doctor[]
+  users         User[]
+  patients      Patient[]
+  appointments  Appointment[]
+  reminderRules ReminderRule[]
+  webhooks      WebhookEndpoint[]
+  auditLogs     AuditLog[]
+
+  @@index([name])
 }
 
-enum UserRole {
-  PATIENT
+enum Role {
+  CLINIC_ADMIN
   DOCTOR
-  ADMIN
+  ASSISTANT
+  PATIENT
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  passwordHash  String
+  firstName     String?
+  lastName      String?
+  phone         String?
+  role          Role
+  active        Boolean   @default(true)
+  emailVerified Boolean   @default(false)
+  lastLoginAt   DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // tenant link
+  clinicId String
+  clinic   Clinic @relation(fields: [clinicId], references: [id])
+
+  // relations to role-specific entities
+  appointments Appointment[] @relation("CreatedAppointments")
+  doctor       Doctor?
+  assistant    Assistant?
+  patient      Patient?
+
+  // audit trail
+  auditLogs AuditLog[] @relation("UserAuditLogs")
+
+  @@index([clinicId])
+  @@index([role])
+}
+
+model Doctor {
+  id String @id @default(cuid())
+
+  // veze
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id])
+
+  clinicId String
+  clinic   Clinic @relation(fields: [clinicId], references: [id])
+
+  // osnovni podaci
+  specialty String?
+  title     String? // npr. "Dr", "Specijalista interne medicine"
+  bio       String? // kratak opis
+  avatarUrl String? // profilna slika doktora
+  languages String[] @default([]) // ["sr", "en", "de"]
+
+  // dostupnost i integracije
+  gcalCalendarId         String? // Google Calendar ID za sinhronizaciju
+  isAcceptingNewPatients Boolean @default(true)
+  timezone               String? // ako se razlikuje od klinike
+
+  // meta
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // relacije
+  slots        WeeklySlot[]
+  appointments Appointment[]
+
+  @@index([clinicId])
+  @@index([specialty])
+}
+
+model Assistant {
+  id String @id @default(cuid())
+
+  // veze
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id])
+
+  clinicId String
+  clinic   Clinic @relation(fields: [clinicId], references: [id])
+
+  // meta podaci
+  title       String? // npr. "Medicinska sestra", "Administrator"
+  permissions String[] @default([]) // kasnije za granularne privilegije
+  active      Boolean  @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([clinicId])
+}
+
+model Patient {
+  id String @id @default(cuid())
+
+  // tenant veza
+  clinicId String
+  clinic   Clinic @relation(fields: [clinicId], references: [id])
+
+  // veza sa user nalogom (ako postoji)
+  userId String? @unique
+  user   User?   @relation(fields: [userId], references: [id])
+
+  // osnovni podaci
+  firstName String
+  lastName  String
+  email     String?
+  phone     String?
+  dob       DateTime? // datum rođenja
+  gender    String? // "male" | "female" | "other"
+  address   String?
+  city      String?
+  country   String?   @default("RS")
+  notes     String? // interni komentari lekara ili asistenta
+
+  // istorija i odnosi
+  appointments Appointment[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // constraints
+  @@unique([clinicId, email])
+  @@index([clinicId])
+  @@index([lastName])
+}
+
+enum AppointmentStatus {
+  PENDING // termin rezervisan ali nepotvrđen
+  CONFIRMED // potvrđen od strane klinike
+  CANCELLED // otkazan
+  NOSHOW // pacijent nije došao
+  COMPLETED // završen termin
+}
+
+enum AppointmentSource {
+  ADMIN_PORTAL
+  PATIENT_PORTAL
+  GOOGLE_CALENDAR
+  API
+}
+
+model Appointment {
+  id String @id @default(cuid())
+
+  // veze
+  clinicId String
+  clinic   Clinic @relation(fields: [clinicId], references: [id])
+
+  doctorId String
+  doctor   Doctor @relation(fields: [doctorId], references: [id])
+
+  patientId String
+  patient   Patient @relation(fields: [patientId], references: [id])
+
+  // osnovni podaci
+  start  DateTime
+  end    DateTime
+  status AppointmentStatus @default(PENDING)
+  source AppointmentSource @default(ADMIN_PORTAL)
+  reason String?
+  notes  String? // interne napomene (ne vidi pacijent)
+
+  // integracije
+  gcalEventId String? // Google Calendar event ID
+  createdById String? // ko je zakazao termin (userId)
+  createdBy   User?   @relation("CreatedAppointments", fields: [createdById], references: [id])
+
+  // meta
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // relacije
+  reminders Reminder[]
+  auditLogs AuditLog[]
+
+  @@unique([doctorId, start, end]) // sprečava preklapanje termina kod istog doktora
+  @@index([clinicId])
+  @@index([doctorId])
+  @@index([patientId])
+  @@index([status])
+}
+
+model WeeklySlot {
+  id String @id @default(cuid())
+
+  doctorId String
+  doctor   Doctor @relation(fields: [doctorId], references: [id])
+
+  weekday     Int // 1 = Monday, 7 = Sunday
+  startTime   String // format "09:00"
+  endTime     String // format "13:30"
+  durationMin Int? // tipično 30, 45, 60 - koristi se za generisanje slotova
+
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([doctorId, weekday, startTime, endTime])
+  @@index([doctorId])
+}
+
+model ReminderRule {
+  id String @id @default(cuid())
+
+  clinicId String
+  clinic   Clinic @relation(fields: [clinicId], references: [id])
+
+  // koliko pre termina se šalje
+  offsetMin Int // npr. 1440 = 24h pre termina
+  channel   String // "SMS" | "EMAIL"
+  active    Boolean @default(true)
+
+  template  String? // opciono: custom tekst poruke (može imati placeholder-e)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  reminders Reminder[]
+
+  @@unique([clinicId, offsetMin, channel])
+  @@index([clinicId])
+}
+
+enum ReminderStatus {
+  SCHEDULED
+  SENT
+  FAILED
+  SKIPPED
+}
+
+model Reminder {
+  id String @id @default(cuid())
+
+  appointmentId String
+  appointment   Appointment @relation(fields: [appointmentId], references: [id])
+
+  ruleId String?
+  rule   ReminderRule? @relation(fields: [ruleId], references: [id])
+
+  channel      String // "SMS" | "EMAIL"
+  scheduledFor DateTime // kada treba da se pošalje
+  sentAt       DateTime?
+  status       ReminderStatus @default(SCHEDULED)
+  error        String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([appointmentId])
+  @@index([scheduledFor])
+}
+
+model WebhookEndpoint {
+  id String @id @default(cuid())
+
+  clinicId String
+  clinic   Clinic @relation(fields: [clinicId], references: [id])
+
+  url         String // npr. https://api.partner.com/hooks
+  secret      String // HMAC secret za verifikaciju
+  active      Boolean @default(true)
+  description String? // opis integracije
+
+  // koje evente endpoint prima (čuvamo kao JSON niz)
+  events String[] @default(["appointment.created", "appointment.updated"])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  lastSuccessAt DateTime?
+  lastFailureAt DateTime?
+  failureCount  Int       @default(0)
+
+  @@unique([clinicId, url])
+  @@index([clinicId])
+}
+
+model AuditLog {
+  id String @id @default(cuid())
+
+  clinicId String
+  clinic   Clinic @relation(fields: [clinicId], references: [id])
+
+  actorId String? // korisnik koji je izvršio akciju
+  actor   User?   @relation("UserAuditLogs", fields: [actorId], references: [id])
+
+  action   String // e.g. "appointment.create"
+  entity   String // e.g. "Appointment", "Patient"
+  entityId String // e.g. "apt_123"
+  metadata Json? // dodatni detalji o događaju
+
+  ipAddress String? // IP adresa ako je dostupna
+  userAgent String? // browser info, ako je web app
+
+  createdAt DateTime @default(now())
+
+  appointment   Appointment? @relation(fields: [appointmentId], references: [id])
+  appointmentId String?
+
+  @@index([clinicId])
+  @@index([entity])
+  @@index([actorId])
 }

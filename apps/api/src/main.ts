@@ -1,44 +1,46 @@
-import express from 'express';
+import { ApolloServer, BaseContext } from '@apollo/server';
+import { startStandaloneServer } from '@apollo/server/standalone';
 import { prisma } from './lib/prisma';
+import { typeDefs } from './graphql/schema';
+import { resolvers } from './graphql/resolvers';
 
-const host = process.env.HOST ?? 'localhost';
 const port = process.env.PORT ? Number(process.env.PORT) : 3000;
 
-const app = express();
-
-// Middleware
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-
-// Health check endpoint
-app.get('/health', (_req, res) => {
-  res.json({ status: 'ok', timestamp: new Date().toISOString() });
+// Initialize Apollo Server
+const server = new ApolloServer<BaseContext>({
+  typeDefs,
+  resolvers,
 });
 
-// Root endpoint
-app.get('/', (_req, res) => {
-  res.json({
-    message: 'Health Care API',
-    version: '1.0.0',
-    endpoints: {
-      health: '/health'
-    }
+// Start function to initialize Apollo Server
+async function startServer() {
+  const { url } = await startStandaloneServer(server, {
+    listen: { port },
+    context: async () => ({
+      prisma,
+    }),
   });
-});
 
-// Graceful shutdown
-process.on('SIGINT', async () => {
-  console.log('Shutting down gracefully...');
-  await prisma.$disconnect();
-  process.exit(0);
-});
+  console.log(`[ ready ] ${url}`);
+  console.log(`[ graphql ] ${url}`);
 
-process.on('SIGTERM', async () => {
-  console.log('Shutting down gracefully...');
-  await prisma.$disconnect();
-  process.exit(0);
-});
+  // Graceful shutdown
+  process.on('SIGINT', async () => {
+    console.log('Shutting down gracefully...');
+    await server.stop();
+    await prisma.$disconnect();
+    process.exit(0);
+  });
 
-app.listen(port, host, () => {
-  console.log(`[ ready ] http://${host}:${port}`);
+  process.on('SIGTERM', async () => {
+    console.log('Shutting down gracefully...');
+    await server.stop();
+    await prisma.$disconnect();
+    process.exit(0);
+  });
+}
+
+startServer().catch((error) => {
+  console.error('Failed to start server:', error);
+  process.exit(1);
 });
