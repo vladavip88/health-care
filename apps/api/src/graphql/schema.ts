@@ -1,5 +1,6 @@
 import gql from 'graphql-tag';
 import { userSchema } from '../modules/user/user.schema';
+import { authSchema } from '../modules/auth/auth.schema';
 
 /**
  * Root schema with base Query and Mutation types
@@ -19,4 +20,4 @@ const baseSchema = gql`
  * Combined type definitions
  * Includes base schema and all module schemas
  */
-export const typeDefs = [baseSchema, userSchema];
+export const typeDefs = [baseSchema, userSchema, authSchema];
