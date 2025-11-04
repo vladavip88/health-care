@@ -1,7 +1,7 @@
 import { GraphQLError } from 'graphql';
 import { AppointmentStatus, AppointmentSource } from '@prisma/client';
 import { appointmentRepository } from './appointment.repository';
-import type { Context } from '../../common/context';
+import type { Context } from '../../common/types/context';
 
 interface CreateAppointmentInput {
   doctorId: string;

@@ -1,7 +1,7 @@
 import { auditLogQueries } from './auditLog.queries';
 import { auditLogMutations } from './auditLog.mutations';
 
-export default {
+export const auditLogResolver = {
   Query: {
     ...auditLogQueries,
   },

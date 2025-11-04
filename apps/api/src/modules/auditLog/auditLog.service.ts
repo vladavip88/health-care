@@ -1,6 +1,6 @@
 import { GraphQLError } from 'graphql';
 import { auditLogRepository } from './auditLog.repository';
-import type { Context } from '../../common/context';
+import type { Context } from '../../common/types/context';
 
 interface AuditLogFilterInput {
   actorId?: string;

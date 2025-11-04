@@ -1,6 +1,6 @@
 import { GraphQLError } from 'graphql';
 import { reminderRepository } from './reminder.repository';
-import type { Context } from '../../common/context';
+import type { Context } from '../../common/types/context';
 import { ReminderStatus } from '@prisma/client';
 
 interface CreateReminderRuleInput {

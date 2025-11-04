@@ -1,7 +1,7 @@
 import { weeklySlotService } from './weeklySlot.service';
-import type { Context } from '../../common/context';
+import type { Context } from '../../common/types/context';
 
-interface CreateWeeklySlotArgs {
+export interface CreateWeeklySlotArgs {
   data: {
     doctorId: string;
     weekday: number;
@@ -12,7 +12,7 @@ interface CreateWeeklySlotArgs {
   };
 }
 
-interface BulkCreateWeeklySlotArgs {
+export interface BulkCreateWeeklySlotArgs {
   data: {
     doctorId: string;
     slots: {
@@ -25,7 +25,7 @@ interface BulkCreateWeeklySlotArgs {
   };
 }
 
-interface UpdateWeeklySlotArgs {
+export interface UpdateWeeklySlotArgs {
   id: string;
   data: {
     weekday?: number;
@@ -36,7 +36,7 @@ interface UpdateWeeklySlotArgs {
   };
 }
 
-interface WeeklySlotIdArgs {
+export interface WeeklySlotIdArgs {
   id: string;
 }
 

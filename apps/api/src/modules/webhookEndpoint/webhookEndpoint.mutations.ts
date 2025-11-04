@@ -1,5 +1,5 @@
 import { webhookEndpointService } from './webhookEndpoint.service';
-import type { Context } from '../../common/context';
+import type { Context } from '../../common/types/context';
 
 export const webhookEndpointMutations = {
   /**

@@ -1,7 +1,7 @@
 import { doctorService } from './doctor.service';
-import type { Context } from '../../common/context';
+import type { Context } from '../../common/types/context';
 
-interface CreateDoctorArgs {
+export interface CreateDoctorArgs {
   data: {
     userId: string;
     specialty?: string;
@@ -15,7 +15,7 @@ interface CreateDoctorArgs {
   };
 }
 
-interface UpdateDoctorArgs {
+export interface UpdateDoctorArgs {
   id: string;
   data: {
     specialty?: string;
@@ -29,7 +29,7 @@ interface UpdateDoctorArgs {
   };
 }
 
-interface DeleteDoctorArgs {
+export interface DeleteDoctorArgs {
   id: string;
 }
 

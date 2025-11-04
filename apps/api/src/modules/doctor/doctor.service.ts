@@ -1,6 +1,6 @@
 import { GraphQLError } from 'graphql';
 import { doctorRepository } from './doctor.repository';
-import type { Context } from '../../common/context';
+import type { Context } from '../../common/types/context';
 
 interface CreateDoctorInput {
   userId: string;

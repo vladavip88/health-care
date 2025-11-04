@@ -1,5 +1,5 @@
 import { weeklySlotService } from './weeklySlot.service';
-import type { Context } from '../../common/context';
+import type { Context } from '../../common/types/context';
 
 export const weeklySlotQueries = {
   /**

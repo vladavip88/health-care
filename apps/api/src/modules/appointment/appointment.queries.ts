@@ -1,8 +1,8 @@
 import { appointmentService } from './appointment.service';
-import type { Context } from '../../common/context';
+import type { Context } from '../../common/types/context';
 import { AppointmentStatus } from '@prisma/client';
 
-interface AppointmentsArgs {
+export interface AppointmentsArgs {
   filter?: {
     doctorId?: string;
     patientId?: string;
@@ -12,7 +12,7 @@ interface AppointmentsArgs {
   };
 }
 
-interface DoctorAppointmentsArgs {
+export interface DoctorAppointmentsArgs {
   doctorId: string;
   filter?: {
     status?: AppointmentStatus;

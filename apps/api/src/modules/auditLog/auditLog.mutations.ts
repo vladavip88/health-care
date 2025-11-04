@@ -1,5 +1,5 @@
 import { auditLogService } from './auditLog.service';
-import type { Context } from '../../common/context';
+import type { Context } from '../../common/types/context';
 
 export const auditLogMutations = {
   /**

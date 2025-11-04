@@ -3,6 +3,7 @@ import { createClinicRepository } from './clinic.repository';
 import { createClinicService } from './clinic.service';
 import { createClinicQueries } from './clinic.queries';
 import { createClinicMutations } from './clinic.mutations';
+import type { Context } from '../../common/types/context';
 
 // Initialize the layers
 const clinicRepository = createClinicRepository(prisma);
@@ -20,5 +21,14 @@ export const clinicResolver = {
   },
   Mutation: {
     ...clinicMutations,
+  },
+  Clinic: {
+    // Note: Clinic is usually the root entity, so it typically doesn't have parent relations
+    // However, if you need to resolve related entities (e.g., users, doctors), add them here
+    // For example:
+    // users: (parent: any, _: any, ctx: Context) => {
+    //   // This would require a usersByClinic DataLoader
+    //   return ctx.loaders.usersByClinic.load(parent.id);
+    // },
   },
 };

@@ -11,6 +11,24 @@ import { permissionDirective } from './common/auth/permission.directive';
 import { authenticateUser } from './common/auth/auth.middleware';
 import type { Context } from './common/types/context';
 
+// Import all DataLoader factories
+import { createClinicLoader } from './modules/clinic/clinic.dataloader';
+import { createUserLoader } from './modules/user/user.dataloader';
+import { createDoctorLoader, createDoctorByUserIdLoader } from './modules/doctor/doctor.dataloader';
+import { createAssistantLoader, createAssistantByUserIdLoader } from './modules/assistant/assistant.dataloader';
+import { createPatientLoader, createPatientByUserIdLoader } from './modules/patient/patient.dataloader';
+import {
+  createAppointmentLoader,
+  createAppointmentsByDoctorLoader,
+  createAppointmentsByPatientLoader,
+} from './modules/appointment/appointment.dataloader';
+import { createWeeklySlotLoader, createWeeklySlotsByDoctorLoader } from './modules/weeklySlot/weeklySlot.dataloader';
+import {
+  createReminderLoader,
+  createRemindersByAppointmentLoader,
+  createReminderRuleLoader,
+} from './modules/reminder/reminder.dataloader';
+
 const port = process.env.PORT ? Number(process.env.PORT) : 3000;
 
 // Create executable schema with directives
@@ -37,10 +55,29 @@ async function startServer() {
       // Authenticate user from Authorization header
       const user = await authenticateUser(req.headers.authorization);
 
+      // Initialize all DataLoaders (unique per request)
       return {
         prisma,
         user: user || undefined,
         clinicId: user?.clinicId,
+        loaders: {
+          clinic: createClinicLoader(prisma),
+          user: createUserLoader(prisma),
+          doctor: createDoctorLoader(prisma),
+          doctorByUserId: createDoctorByUserIdLoader(prisma),
+          assistant: createAssistantLoader(prisma),
+          assistantByUserId: createAssistantByUserIdLoader(prisma),
+          patient: createPatientLoader(prisma),
+          patientByUserId: createPatientByUserIdLoader(prisma),
+          appointment: createAppointmentLoader(prisma),
+          appointmentsByDoctor: createAppointmentsByDoctorLoader(prisma),
+          appointmentsByPatient: createAppointmentsByPatientLoader(prisma),
+          weeklySlot: createWeeklySlotLoader(prisma),
+          weeklySlotsByDoctor: createWeeklySlotsByDoctorLoader(prisma),
+          reminder: createReminderLoader(prisma),
+          remindersByAppointment: createRemindersByAppointmentLoader(prisma),
+          reminderRule: createReminderRuleLoader(prisma),
+        },
       };
     },
   });

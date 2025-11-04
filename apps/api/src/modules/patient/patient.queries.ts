@@ -1,7 +1,7 @@
 import { patientService } from './patient.service';
-import type { Context } from '../../common/context';
+import type { Context } from '../../common/types/context';
 
-interface PatientsArgs {
+export interface PatientsArgs {
   search?: {
     query?: string;
     email?: string;

@@ -1,7 +1,7 @@
 import { patientService } from './patient.service';
-import type { Context } from '../../common/context';
+import type { Context } from '../../common/types/context';
 
-interface CreatePatientArgs {
+export interface CreatePatientArgs {
   data: {
     userId?: string;
     firstName: string;
@@ -17,7 +17,7 @@ interface CreatePatientArgs {
   };
 }
 
-interface UpdatePatientArgs {
+export interface UpdatePatientArgs {
   id: string;
   data: {
     firstName?: string;
@@ -33,7 +33,7 @@ interface UpdatePatientArgs {
   };
 }
 
-interface DeletePatientArgs {
+export interface DeletePatientArgs {
   id: string;
 }
 

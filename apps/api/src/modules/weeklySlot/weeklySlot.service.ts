@@ -1,6 +1,6 @@
 import { GraphQLError } from 'graphql';
 import { weeklySlotRepository } from './weeklySlot.repository';
-import type { Context } from '../../common/context';
+import type { Context } from '../../common/types/context';
 
 interface CreateWeeklySlotInput {
   doctorId: string;

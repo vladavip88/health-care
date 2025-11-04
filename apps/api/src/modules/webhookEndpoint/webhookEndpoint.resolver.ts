@@ -1,7 +1,7 @@
 import { webhookEndpointQueries } from './webhookEndpoint.queries';
 import { webhookEndpointMutations } from './webhookEndpoint.mutations';
 
-export default {
+export const webhookEndpointResolver = {
   Query: {
     ...webhookEndpointQueries,
   },

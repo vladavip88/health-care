@@ -1,7 +1,7 @@
 import { assistantService } from './assistant.service';
-import type { Context } from '../../common/context';
+import type { Context } from '../../common/types/context';
 
-interface CreateAssistantArgs {
+export interface CreateAssistantArgs {
   data: {
     userId: string;
     title?: string;
@@ -10,7 +10,7 @@ interface CreateAssistantArgs {
   };
 }
 
-interface UpdateAssistantArgs {
+export interface UpdateAssistantArgs {
   id: string;
   data: {
     title?: string;
@@ -19,15 +19,15 @@ interface UpdateAssistantArgs {
   };
 }
 
-interface DeleteAssistantArgs {
+export interface DeleteAssistantArgs {
   id: string;
 }
 
-interface DeactivateAssistantArgs {
+export interface DeactivateAssistantArgs {
   id: string;
 }
 
-interface ActivateAssistantArgs {
+export interface ActivateAssistantArgs {
   id: string;
 }
 

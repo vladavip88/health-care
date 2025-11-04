@@ -1,6 +1,6 @@
 import { GraphQLError } from 'graphql';
 import { assistantRepository } from './assistant.repository';
-import type { Context } from '../../common/context';
+import type { Context } from '../../common/types/context';
 
 interface CreateAssistantInput {
   userId: string;

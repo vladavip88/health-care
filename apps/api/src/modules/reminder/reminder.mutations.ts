@@ -1,5 +1,5 @@
 import { reminderService } from './reminder.service';
-import type { Context } from '../../common/context';
+import type { Context } from '../../common/types/context';
 
 export const reminderMutations = {
   // ==================== ReminderRule Mutations ====================

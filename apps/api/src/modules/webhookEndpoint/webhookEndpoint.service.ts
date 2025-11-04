@@ -1,6 +1,6 @@
 import { GraphQLError } from 'graphql';
 import { webhookEndpointRepository } from './webhookEndpoint.repository';
-import type { Context } from '../../common/context';
+import type { Context } from '../../common/types/context';
 import crypto from 'crypto';
 
 interface CreateWebhookEndpointInput {

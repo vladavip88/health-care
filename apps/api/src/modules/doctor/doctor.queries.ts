@@ -1,5 +1,5 @@
 import { doctorService } from './doctor.service';
-import type { Context } from '../../common/context';
+import type { Context } from '../../common/types/context';
 
 export const doctorQueries = {
   /**
