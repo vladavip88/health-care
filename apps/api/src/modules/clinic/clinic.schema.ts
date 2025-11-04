@@ -125,12 +125,14 @@ export const clinicSchema = gql`
     Requires authentication
     """
     clinic(id: ID!): Clinic
+      @auth
 
     """
     Get current user's clinic with statistics
     Requires authentication
     """
     myClinic: ClinicWithStats
+      @auth
 
     """
     Get clinic statistics
@@ -138,6 +140,9 @@ export const clinicSchema = gql`
     Requires CLINIC_READ permission
     """
     clinicStats: ClinicStats
+      @auth
+      @hasRole(roles: ["CLINIC_ADMIN"])
+      @hasPermission(permission: "clinic:read")
 
     """
     Get all clinics (restricted)
@@ -145,6 +150,8 @@ export const clinicSchema = gql`
     Requires CLINIC_READ permission
     """
     clinics: [Clinic!]!
+      @auth
+      @hasPermission(permission: "clinic:read")
   }
 
   extend type Mutation {
@@ -153,6 +160,9 @@ export const clinicSchema = gql`
     Currently disabled - clinics created during onboarding
     """
     createClinic(input: CreateClinicInput!): Clinic!
+      @auth
+      @hasRole(roles: ["CLINIC_ADMIN"])
+      @hasPermission(permission: "clinic:create")
 
     """
     Update clinic settings
@@ -160,6 +170,9 @@ export const clinicSchema = gql`
     Requires CLINIC_UPDATE permission
     """
     updateClinic(input: UpdateClinicInput!): Clinic!
+      @auth
+      @hasRole(roles: ["CLINIC_ADMIN"])
+      @hasPermission(permission: "clinic:update")
 
     """
     Update clinic subscription
@@ -167,11 +180,17 @@ export const clinicSchema = gql`
     Requires CLINIC_SETTINGS permission
     """
     updateClinicSubscription(input: UpdateClinicSubscriptionInput!): Clinic!
+      @auth
+      @hasRole(roles: ["CLINIC_ADMIN"])
+      @hasPermission(permission: "clinic:update")
 
     """
     Delete clinic (restricted)
     Currently disabled - contact platform support
     """
     deleteClinic(id: ID!): Clinic!
+      @auth
+      @hasRole(roles: ["CLINIC_ADMIN"])
+      @hasPermission(permission: "clinic:delete")
   }
 `;

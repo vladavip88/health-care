@@ -925,3 +925,225 @@ src/
 **File Purpose:**  
 This document defines the **GraphQL authorization system** using schema directives with **fine-grained permissions**.  
 It enables clean, declarative, and scalable access control across all GraphQL modules.
+
+# ⚙️ GraphQL DataLoaders — Optimized Batched Loading per Module
+
+## 🎯 Purpose
+This document defines the structure, purpose, and implementation of **DataLoaders** in the GraphQL API.  
+Each module (e.g., Doctor, Patient, Appointment) has its own dedicated DataLoader file that batches and caches related database queries, reducing redundant Prisma calls and N+1 query problems.
+
+---
+
+## 🧠 What is a DataLoader?
+A **DataLoader** batches multiple GraphQL resolver requests for the same entity type into a **single database query** and then **caches** the results per request.  
+This is critical for performance in GraphQL, especially with nested relationships (e.g., `appointment.doctor`, `doctor.clinic`, `patient.appointments`).
+
+Example problem without DataLoader:
+```graphql
+query {
+  appointments {
+    id
+    doctor { id name }
+    patient { id name }
+  }
+}
+```
+Without batching, this could trigger 2 extra SQL queries per appointment (N+1 problem).  
+With DataLoader — only **1 query per entity type per request**.
+
+---
+
+## 📁 Folder Structure
+
+Each module defines its own DataLoader inside a `dataloader` folder or file:
+
+```
+src/modules/
+  doctor/
+    doctor.dataloader.ts
+  patient/
+    patient.dataloader.ts
+  appointment/
+    appointment.dataloader.ts
+  clinic/
+    clinic.dataloader.ts
+```
+
+Then all DataLoaders are registered inside the **GraphQL context** (`context.ts`).
+
+---
+
+## 🧩 Example Implementation — Doctor DataLoader
+
+```ts
+// src/modules/doctor/doctor.dataloader.ts
+import DataLoader from "dataloader";
+
+export const createDoctorLoader = (prisma) =>
+  new DataLoader(async (ids: readonly string[]) => {
+    const doctors = await prisma.doctor.findMany({
+      where: { id: { in: ids as string[] } },
+    });
+    const doctorMap = new Map(doctors.map((d) => [d.id, d]));
+    return ids.map((id) => doctorMap.get(id) || null);
+  });
+```
+
+✅ **Notes:**
+- Fetches all doctors for given IDs in one query.
+- Maintains the same order as incoming keys.
+- Uses per-request caching (unique for each GraphQL request).
+
+---
+
+## 🧩 Example — Patient DataLoader
+
+```ts
+// src/modules/patient/patient.dataloader.ts
+import DataLoader from "dataloader";
+
+export const createPatientLoader = (prisma) =>
+  new DataLoader(async (ids: readonly string[]) => {
+    const patients = await prisma.patient.findMany({
+      where: { id: { in: ids as string[] } },
+    });
+    const map = new Map(patients.map((p) => [p.id, p]));
+    return ids.map((id) => map.get(id) || null);
+  });
+```
+
+✅ This loader batches patient lookups (e.g., from appointments list).
+
+---
+
+## 🧩 Example — Appointment DataLoader
+
+```ts
+// src/modules/appointment/appointment.dataloader.ts
+import DataLoader from "dataloader";
+
+export const createAppointmentLoader = (prisma) =>
+  new DataLoader(async (ids: readonly string[]) => {
+    const appointments = await prisma.appointment.findMany({
+      where: { id: { in: ids as string[] } },
+      include: { doctor: true, patient: true },
+    });
+    const map = new Map(appointments.map((a) => [a.id, a]));
+    return ids.map((id) => map.get(id) || null);
+  });
+```
+
+✅ Handles batching and relation prefetching efficiently.
+
+---
+
+## 🧩 Example — Clinic DataLoader
+
+```ts
+// src/modules/clinic/clinic.dataloader.ts
+import DataLoader from "dataloader";
+
+export const createClinicLoader = (prisma) =>
+  new DataLoader(async (ids: readonly string[]) => {
+    const clinics = await prisma.clinic.findMany({
+      where: { id: { in: ids as string[] } },
+      select: { id: true, name: true, timezone: true },
+    });
+    const map = new Map(clinics.map((c) => [c.id, c]));
+    return ids.map((id) => map.get(id) || null);
+  });
+```
+
+✅ Lightweight loader optimized for clinic lookups across entities.
+
+---
+
+## 🧩 Integrating DataLoaders in GraphQL Context
+
+Each loader is initialized **once per request** in the `context.ts` file:
+
+```ts
+// src/common/context.ts
+import { createDoctorLoader } from "../modules/doctor/doctor.dataloader";
+import { createPatientLoader } from "../modules/patient/patient.dataloader";
+import { createAppointmentLoader } from "../modules/appointment/appointment.dataloader";
+import { createClinicLoader } from "../modules/clinic/clinic.dataloader";
+
+export function context({ req }) {
+  const user = verifyJwt(req.headers.authorization);
+  return {
+    prisma,
+    user,
+    clinicId: user?.clinicId,
+    loaders: {
+      doctor: createDoctorLoader(prisma),
+      patient: createPatientLoader(prisma),
+      appointment: createAppointmentLoader(prisma),
+      clinic: createClinicLoader(prisma),
+    },
+  };
+}
+```
+
+✅ Each loader is unique per request → no cross-request cache pollution.  
+✅ Accessible in any resolver via `ctx.loaders.<entity>.load(id)`.
+
+---
+
+## 🧠 Using DataLoaders in Resolvers
+
+Example in `appointment.resolver.ts`:
+
+```ts
+export default {
+  Appointment: {
+    doctor: (parent, _, ctx) => ctx.loaders.doctor.load(parent.doctorId),
+    patient: (parent, _, ctx) => ctx.loaders.patient.load(parent.patientId),
+    clinic: (parent, _, ctx) => ctx.loaders.clinic.load(parent.clinicId),
+  },
+};
+```
+
+✅ Avoids extra Prisma calls.  
+✅ Automatically batches doctor/patient/clinic lookups across appointments.
+
+---
+
+## ⚡ Advanced Optimization: Field-level Caching
+
+You can use `DataLoader.clear()` or `DataLoader.prime()` to handle local cache consistency:
+
+```ts
+ctx.loaders.doctor.clear(doctor.id).prime(doctor.id, doctor);
+```
+
+Use this after mutations (e.g., when updating doctor profile) to keep the in-memory cache fresh.
+
+---
+
+## 🧩 Best Practices
+
+| Practice | Description |
+|-----------|--------------|
+| **One loader per entity** | Each module owns its own DataLoader factory. |
+| **Init once per request** | Instantiate loaders inside GraphQL context, not globally. |
+| **Keep queries minimal** | Load only what you need (`select` instead of `include` when possible). |
+| **Use Maps for order preservation** | Always map results back to input order. |
+| **Invalidate cache on mutation** | Clear/prime updated records after mutations. |
+| **Avoid cross-entity loaders** | Keep loaders single-purpose (doctor → by ID, not by clinic). |
+
+---
+
+## ✅ Summary
+
+- DataLoaders batch queries and cache per request → eliminate N+1 problems.  
+- Each module has its own loader (e.g., `doctor.dataloader.ts`).  
+- Loaders are created in `context.ts` and accessed via `ctx.loaders`.  
+- Always return results in the same order as input keys.  
+- Cache is isolated per request, ensuring safe multi-tenant isolation.
+
+---
+
+**File Purpose:**  
+This document defines the standard for implementing and using **DataLoaders** in the GraphQL API architecture.  
+It ensures consistent performance optimization and modular separation for each entity loader.

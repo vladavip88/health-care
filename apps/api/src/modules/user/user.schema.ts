@@ -33,6 +33,9 @@ export const userSchema = gql`
     Requires authentication and appropriate permissions
     """
     user(id: ID!): User
+      @auth
+      @hasRole(roles: ["CLINIC_ADMIN", "DOCTOR", "ASSISTANT"])
+      @hasPermission(permission: "user:read")
 
     """
     Get all users in the clinic
@@ -40,12 +43,18 @@ export const userSchema = gql`
     Requires USER_READ permission
     """
     users(role: Role, active: Boolean, search: String): [User!]!
+      @auth
+      @hasRole(roles: ["CLINIC_ADMIN"])
+      @hasPermission(permission: "user:read")
 
     """
     Search users by name or email
     Requires USER_READ permission
     """
     searchUsers(query: String!): [User!]!
+      @auth
+      @hasRole(roles: ["CLINIC_ADMIN", "ASSISTANT"])
+      @hasPermission(permission: "user:read")
   }
 
   extend type Mutation {
@@ -63,6 +72,9 @@ export const userSchema = gql`
       role: Role!
       clinicId: String!
     ): User!
+      @auth
+      @hasRole(roles: ["CLINIC_ADMIN"])
+      @hasPermission(permission: "user:create")
 
     """
     Update an existing user
@@ -76,6 +88,8 @@ export const userSchema = gql`
       phone: String
       active: Boolean
     ): User!
+      @auth
+      @hasPermission(permission: "user:update")
 
     """
     Delete a user
@@ -83,5 +97,8 @@ export const userSchema = gql`
     Users cannot delete themselves
     """
     deleteUser(id: ID!): User!
+      @auth
+      @hasRole(roles: ["CLINIC_ADMIN"])
+      @hasPermission(permission: "user:delete")
   }
 `;
