@@ -1,5 +1,5 @@
 import { assistantService } from './assistant.service';
-import type { Context } from '../../common/types/context';
+import type { Context, AuthenticatedContext } from '../../common/types/context';
 
 export interface CreateAssistantArgs {
   data: {
@@ -37,7 +37,7 @@ export const assistantMutations = {
    * Accessible by: CLINIC_ADMIN
    */
   createAssistant: async (_: any, { data }: CreateAssistantArgs, ctx: Context) => {
-    return assistantService(ctx).create(data);
+    return assistantService(ctx as AuthenticatedContext).create(data);
   },
 
   /**
@@ -45,7 +45,7 @@ export const assistantMutations = {
    * Accessible by: CLINIC_ADMIN (any assistant), ASSISTANT (own profile only, limited fields)
    */
   updateAssistant: async (_: any, { id, data }: UpdateAssistantArgs, ctx: Context) => {
-    return assistantService(ctx).update(id, data);
+    return assistantService(ctx as AuthenticatedContext).update(id, data);
   },
 
   /**
@@ -53,7 +53,7 @@ export const assistantMutations = {
    * Accessible by: CLINIC_ADMIN
    */
   deleteAssistant: async (_: any, { id }: DeleteAssistantArgs, ctx: Context) => {
-    return assistantService(ctx).delete(id);
+    return assistantService(ctx as AuthenticatedContext).delete(id);
   },
 
   /**
@@ -61,7 +61,7 @@ export const assistantMutations = {
    * Accessible by: CLINIC_ADMIN
    */
   deactivateAssistant: async (_: any, { id }: DeactivateAssistantArgs, ctx: Context) => {
-    return assistantService(ctx).deactivate(id);
+    return assistantService(ctx as AuthenticatedContext).deactivate(id);
   },
 
   /**
@@ -69,6 +69,6 @@ export const assistantMutations = {
    * Accessible by: CLINIC_ADMIN
    */
   activateAssistant: async (_: any, { id }: ActivateAssistantArgs, ctx: Context) => {
-    return assistantService(ctx).activate(id);
+    return assistantService(ctx as AuthenticatedContext).activate(id);
   },
 };

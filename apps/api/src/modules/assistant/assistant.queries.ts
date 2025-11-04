@@ -1,5 +1,5 @@
 import { assistantService } from './assistant.service';
-import type { Context } from '../../common/types/context';
+import type { Context, AuthenticatedContext } from '../../common/types/context';
 
 export const assistantQueries = {
   /**
@@ -7,7 +7,7 @@ export const assistantQueries = {
    * Accessible by: CLINIC_ADMIN
    */
   assistants: async (_: any, __: any, ctx: Context) => {
-    return assistantService(ctx).list();
+    return assistantService(ctx as AuthenticatedContext).list();
   },
 
   /**
@@ -15,7 +15,7 @@ export const assistantQueries = {
    * Accessible by: CLINIC_ADMIN, ASSISTANT (own profile only)
    */
   assistant: async (_: any, { id }: { id: string }, ctx: Context) => {
-    return assistantService(ctx).getById(id);
+    return assistantService(ctx as AuthenticatedContext).getById(id);
   },
 
   /**
@@ -23,6 +23,6 @@ export const assistantQueries = {
    * Accessible by: ASSISTANT
    */
   myAssistantProfile: async (_: any, __: any, ctx: Context) => {
-    return assistantService(ctx).getMyProfile();
+    return assistantService(ctx as AuthenticatedContext).getMyProfile();
   },
 };

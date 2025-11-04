@@ -1,5 +1,5 @@
 import { appointmentService } from './appointment.service';
-import type { Context } from '../../common/types/context';
+import type { Context, AuthenticatedContext } from '../../common/types/context';
 import { AppointmentStatus, AppointmentSource } from '@prisma/client';
 
 export interface CreateAppointmentArgs {
@@ -36,7 +36,7 @@ export const appointmentMutations = {
    * Accessible by: CLINIC_ADMIN, ASSISTANT
    */
   createAppointment: async (_: any, { data }: CreateAppointmentArgs, ctx: Context) => {
-    return appointmentService(ctx).create(data);
+    return appointmentService(ctx as AuthenticatedContext).create(data);
   },
 
   /**
@@ -44,7 +44,7 @@ export const appointmentMutations = {
    * Accessible by: CLINIC_ADMIN, ASSISTANT
    */
   updateAppointment: async (_: any, { id, data }: UpdateAppointmentArgs, ctx: Context) => {
-    return appointmentService(ctx).update(id, data);
+    return appointmentService(ctx as AuthenticatedContext).update(id, data);
   },
 
   /**
@@ -52,7 +52,7 @@ export const appointmentMutations = {
    * Accessible by: CLINIC_ADMIN, ASSISTANT, PATIENT (own only)
    */
   cancelAppointment: async (_: any, { id }: AppointmentIdArgs, ctx: Context) => {
-    return appointmentService(ctx).cancel(id);
+    return appointmentService(ctx as AuthenticatedContext).cancel(id);
   },
 
   /**
@@ -60,7 +60,7 @@ export const appointmentMutations = {
    * Accessible by: CLINIC_ADMIN, ASSISTANT
    */
   confirmAppointment: async (_: any, { id }: AppointmentIdArgs, ctx: Context) => {
-    return appointmentService(ctx).confirm(id);
+    return appointmentService(ctx as AuthenticatedContext).confirm(id);
   },
 
   /**
@@ -68,7 +68,7 @@ export const appointmentMutations = {
    * Accessible by: CLINIC_ADMIN, DOCTOR (own only)
    */
   completeAppointment: async (_: any, { id }: AppointmentIdArgs, ctx: Context) => {
-    return appointmentService(ctx).complete(id);
+    return appointmentService(ctx as AuthenticatedContext).complete(id);
   },
 
   /**
@@ -76,7 +76,7 @@ export const appointmentMutations = {
    * Accessible by: CLINIC_ADMIN, ASSISTANT, DOCTOR (own only)
    */
   markNoShow: async (_: any, { id }: AppointmentIdArgs, ctx: Context) => {
-    return appointmentService(ctx).markNoShow(id);
+    return appointmentService(ctx as AuthenticatedContext).markNoShow(id);
   },
 
   /**
@@ -84,6 +84,6 @@ export const appointmentMutations = {
    * Accessible by: CLINIC_ADMIN
    */
   deleteAppointment: async (_: any, { id }: AppointmentIdArgs, ctx: Context) => {
-    return appointmentService(ctx).delete(id);
+    return appointmentService(ctx as AuthenticatedContext).delete(id);
   },
 };

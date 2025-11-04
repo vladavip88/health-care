@@ -1,5 +1,5 @@
 import type { ClinicService } from './clinic.service';
-import type { Context } from '../../common/types/context';
+import type { Context, AuthenticatedContext } from '../../common/types/context';
 
 export interface GetClinicArgs {
   id: string;
@@ -16,14 +16,14 @@ export function createClinicQueries(service: ClinicService) {
      * Users can only access their own clinic
      */
     clinic: async (_parent: unknown, args: GetClinicArgs, context: Context) => {
-      return service.getClinicById(args.id, context);
+      return service.getClinicById(args.id, context as AuthenticatedContext);
     },
 
     /**
      * Get current user's clinic with statistics
      */
     myClinic: async (_parent: unknown, _args: unknown, context: Context) => {
-      return service.getCurrentClinic(context);
+      return service.getCurrentClinic(context as AuthenticatedContext);
     },
 
     /**
@@ -31,7 +31,7 @@ export function createClinicQueries(service: ClinicService) {
      * Only CLINIC_ADMIN can view
      */
     clinicStats: async (_parent: unknown, _args: unknown, context: Context) => {
-      return service.getClinicStats(context);
+      return service.getClinicStats(context as AuthenticatedContext);
     },
 
     /**
@@ -39,7 +39,7 @@ export function createClinicQueries(service: ClinicService) {
      * Returns only the user's clinic for now
      */
     clinics: async (_parent: unknown, _args: unknown, context: Context) => {
-      return service.getClinics(context);
+      return service.getClinics(context as AuthenticatedContext);
     },
   };
 }

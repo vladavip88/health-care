@@ -1,5 +1,5 @@
 import { webhookEndpointService } from './webhookEndpoint.service';
-import type { Context } from '../../common/types/context';
+import type { Context, AuthenticatedContext } from '../../common/types/context';
 
 export const webhookEndpointMutations = {
   /**
@@ -11,7 +11,7 @@ export const webhookEndpointMutations = {
     { data }: { data: any },
     ctx: Context
   ) => {
-    return webhookEndpointService(ctx).create(data);
+    return webhookEndpointService(ctx as AuthenticatedContext).create(data);
   },
 
   /**
@@ -23,7 +23,7 @@ export const webhookEndpointMutations = {
     { id, data }: { id: string; data: any },
     ctx: Context
   ) => {
-    return webhookEndpointService(ctx).update(id, data);
+    return webhookEndpointService(ctx as AuthenticatedContext).update(id, data);
   },
 
   /**
@@ -35,7 +35,7 @@ export const webhookEndpointMutations = {
     { id }: { id: string },
     ctx: Context
   ) => {
-    return webhookEndpointService(ctx).delete(id);
+    return webhookEndpointService(ctx as AuthenticatedContext).delete(id);
   },
 
   /**
@@ -47,7 +47,7 @@ export const webhookEndpointMutations = {
     { id }: { id: string },
     ctx: Context
   ) => {
-    return webhookEndpointService(ctx).activate(id);
+    return webhookEndpointService(ctx as AuthenticatedContext).activate(id);
   },
 
   /**
@@ -59,7 +59,7 @@ export const webhookEndpointMutations = {
     { id }: { id: string },
     ctx: Context
   ) => {
-    return webhookEndpointService(ctx).deactivate(id);
+    return webhookEndpointService(ctx as AuthenticatedContext).deactivate(id);
   },
 
   /**
@@ -71,7 +71,7 @@ export const webhookEndpointMutations = {
     { id }: { id: string },
     ctx: Context
   ) => {
-    return webhookEndpointService(ctx).testWebhook(id);
+    return webhookEndpointService(ctx as AuthenticatedContext).testWebhook(id);
   },
 
   /**
@@ -83,6 +83,6 @@ export const webhookEndpointMutations = {
     { id }: { id: string },
     ctx: Context
   ) => {
-    return webhookEndpointService(ctx).resetFailureCount(id);
+    return webhookEndpointService(ctx as AuthenticatedContext).resetFailureCount(id);
   },
 };

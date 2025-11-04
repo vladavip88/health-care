@@ -1,5 +1,5 @@
 import { doctorService } from './doctor.service';
-import type { Context } from '../../common/types/context';
+import type { Context, AuthenticatedContext } from '../../common/types/context';
 
 export interface CreateDoctorArgs {
   data: {
@@ -39,7 +39,7 @@ export const doctorMutations = {
    * Accessible by: CLINIC_ADMIN
    */
   createDoctor: async (_: any, { data }: CreateDoctorArgs, ctx: Context) => {
-    return doctorService(ctx).create(data);
+    return doctorService(ctx as AuthenticatedContext).create(data);
   },
 
   /**
@@ -47,7 +47,7 @@ export const doctorMutations = {
    * Accessible by: CLINIC_ADMIN (any doctor), DOCTOR (own profile only)
    */
   updateDoctor: async (_: any, { id, data }: UpdateDoctorArgs, ctx: Context) => {
-    return doctorService(ctx).update(id, data);
+    return doctorService(ctx as AuthenticatedContext).update(id, data);
   },
 
   /**
@@ -55,6 +55,6 @@ export const doctorMutations = {
    * Accessible by: CLINIC_ADMIN
    */
   deleteDoctor: async (_: any, { id }: DeleteDoctorArgs, ctx: Context) => {
-    return doctorService(ctx).delete(id);
+    return doctorService(ctx as AuthenticatedContext).delete(id);
   },
 };

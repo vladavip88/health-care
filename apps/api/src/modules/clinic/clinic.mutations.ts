@@ -1,5 +1,5 @@
 import type { ClinicService, CreateClinicInput, UpdateClinicInput, UpdateSubscriptionInput } from './clinic.service';
-import type { Context } from '../../common/types/context';
+import type { Context, AuthenticatedContext } from '../../common/types/context';
 
 /**
  * Clinic Mutations
@@ -11,7 +11,7 @@ export function createClinicMutations(service: ClinicService) {
      * Create a new clinic (restricted)
      */
     createClinic: async (_parent: unknown, args: CreateClinicInput, context: Context) => {
-      return service.createClinic(args, context);
+      return service.createClinic(args, context as AuthenticatedContext);
     },
 
     /**
@@ -19,7 +19,7 @@ export function createClinicMutations(service: ClinicService) {
      * Only CLINIC_ADMIN can update
      */
     updateClinic: async (_parent: unknown, args: UpdateClinicInput, context: Context) => {
-      return service.updateClinic(args, context);
+      return service.updateClinic(args, context as AuthenticatedContext);
     },
 
     /**
@@ -27,14 +27,14 @@ export function createClinicMutations(service: ClinicService) {
      * Only CLINIC_ADMIN can update
      */
     updateClinicSubscription: async (_parent: unknown, args: UpdateSubscriptionInput, context: Context) => {
-      return service.updateSubscription(args, context);
+      return service.updateSubscription(args, context as AuthenticatedContext);
     },
 
     /**
      * Delete clinic (restricted)
      */
     deleteClinic: async (_parent: unknown, args: { id: string }, context: Context) => {
-      return service.deleteClinic(args.id, context);
+      return service.deleteClinic(args.id, context as AuthenticatedContext);
     },
   };
 }

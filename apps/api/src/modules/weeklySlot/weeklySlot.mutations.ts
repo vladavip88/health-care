@@ -1,5 +1,5 @@
 import { weeklySlotService } from './weeklySlot.service';
-import type { Context } from '../../common/types/context';
+import type { Context, AuthenticatedContext } from '../../common/types/context';
 
 export interface CreateWeeklySlotArgs {
   data: {
@@ -46,7 +46,7 @@ export const weeklySlotMutations = {
    * Accessible by: CLINIC_ADMIN, DOCTOR (own only)
    */
   createWeeklySlot: async (_: any, { data }: CreateWeeklySlotArgs, ctx: Context) => {
-    return weeklySlotService(ctx).create(data);
+    return weeklySlotService(ctx as AuthenticatedContext).create(data);
   },
 
   /**
@@ -54,7 +54,7 @@ export const weeklySlotMutations = {
    * Accessible by: CLINIC_ADMIN, DOCTOR (own only)
    */
   bulkCreateWeeklySlots: async (_: any, { data }: BulkCreateWeeklySlotArgs, ctx: Context) => {
-    return weeklySlotService(ctx).bulkCreate(data);
+    return weeklySlotService(ctx as AuthenticatedContext).bulkCreate(data);
   },
 
   /**
@@ -62,7 +62,7 @@ export const weeklySlotMutations = {
    * Accessible by: CLINIC_ADMIN, DOCTOR (own only)
    */
   updateWeeklySlot: async (_: any, { id, data }: UpdateWeeklySlotArgs, ctx: Context) => {
-    return weeklySlotService(ctx).update(id, data);
+    return weeklySlotService(ctx as AuthenticatedContext).update(id, data);
   },
 
   /**
@@ -70,7 +70,7 @@ export const weeklySlotMutations = {
    * Accessible by: CLINIC_ADMIN, DOCTOR (own only)
    */
   deleteWeeklySlot: async (_: any, { id }: WeeklySlotIdArgs, ctx: Context) => {
-    return weeklySlotService(ctx).delete(id);
+    return weeklySlotService(ctx as AuthenticatedContext).delete(id);
   },
 
   /**
@@ -78,7 +78,7 @@ export const weeklySlotMutations = {
    * Accessible by: CLINIC_ADMIN, DOCTOR (own only)
    */
   activateWeeklySlot: async (_: any, { id }: WeeklySlotIdArgs, ctx: Context) => {
-    return weeklySlotService(ctx).activate(id);
+    return weeklySlotService(ctx as AuthenticatedContext).activate(id);
   },
 
   /**
@@ -86,6 +86,6 @@ export const weeklySlotMutations = {
    * Accessible by: CLINIC_ADMIN, DOCTOR (own only)
    */
   deactivateWeeklySlot: async (_: any, { id }: WeeklySlotIdArgs, ctx: Context) => {
-    return weeklySlotService(ctx).deactivate(id);
+    return weeklySlotService(ctx as AuthenticatedContext).deactivate(id);
   },
 };

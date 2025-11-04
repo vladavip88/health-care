@@ -280,7 +280,8 @@ export const weeklySlotService = (ctx: AuthenticatedContext) => {
 
           createdSlots.push(slot);
         } catch (error) {
-          errors.push(`Error creating slot: ${error.message}`);
+          const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+          errors.push(`Error creating slot: ${errorMessage}`);
         }
       }
 

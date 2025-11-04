@@ -1,5 +1,5 @@
 import { reminderService } from './reminder.service';
-import type { Context } from '../../common/types/context';
+import type { Context, AuthenticatedContext } from '../../common/types/context';
 
 export const reminderMutations = {
   // ==================== ReminderRule Mutations ====================
@@ -13,7 +13,7 @@ export const reminderMutations = {
     { data }: { data: any },
     ctx: Context
   ) => {
-    return reminderService(ctx).createRule(data);
+    return reminderService(ctx as AuthenticatedContext).createRule(data);
   },
 
   /**
@@ -25,7 +25,7 @@ export const reminderMutations = {
     { id, data }: { id: string; data: any },
     ctx: Context
   ) => {
-    return reminderService(ctx).updateRule(id, data);
+    return reminderService(ctx as AuthenticatedContext).updateRule(id, data);
   },
 
   /**
@@ -37,7 +37,7 @@ export const reminderMutations = {
     { id }: { id: string },
     ctx: Context
   ) => {
-    return reminderService(ctx).deleteRule(id);
+    return reminderService(ctx as AuthenticatedContext).deleteRule(id);
   },
 
   /**
@@ -49,7 +49,7 @@ export const reminderMutations = {
     { id }: { id: string },
     ctx: Context
   ) => {
-    return reminderService(ctx).activateRule(id);
+    return reminderService(ctx as AuthenticatedContext).activateRule(id);
   },
 
   /**
@@ -61,7 +61,7 @@ export const reminderMutations = {
     { id }: { id: string },
     ctx: Context
   ) => {
-    return reminderService(ctx).deactivateRule(id);
+    return reminderService(ctx as AuthenticatedContext).deactivateRule(id);
   },
 
   // ==================== Reminder Mutations ====================
@@ -75,7 +75,7 @@ export const reminderMutations = {
     { appointmentId }: { appointmentId: string },
     ctx: Context
   ) => {
-    return reminderService(ctx).generateRemindersForAppointment(appointmentId);
+    return reminderService(ctx as AuthenticatedContext).generateRemindersForAppointment(appointmentId);
   },
 
   /**
@@ -87,7 +87,7 @@ export const reminderMutations = {
     { id }: { id: string },
     ctx: Context
   ) => {
-    return reminderService(ctx).cancelReminder(id);
+    return reminderService(ctx as AuthenticatedContext).cancelReminder(id);
   },
 
   /**
@@ -99,7 +99,7 @@ export const reminderMutations = {
     { id }: { id: string },
     ctx: Context
   ) => {
-    return reminderService(ctx).markReminderSent(id);
+    return reminderService(ctx as AuthenticatedContext).markReminderSent(id);
   },
 
   /**
@@ -111,6 +111,6 @@ export const reminderMutations = {
     { id, error }: { id: string; error: string },
     ctx: Context
   ) => {
-    return reminderService(ctx).markReminderFailed(id, error);
+    return reminderService(ctx as AuthenticatedContext).markReminderFailed(id, error);
   },
 };

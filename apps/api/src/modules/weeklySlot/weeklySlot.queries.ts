@@ -1,5 +1,5 @@
 import { weeklySlotService } from './weeklySlot.service';
-import type { Context } from '../../common/types/context';
+import type { Context, AuthenticatedContext } from '../../common/types/context';
 
 export const weeklySlotQueries = {
   /**
@@ -7,7 +7,7 @@ export const weeklySlotQueries = {
    * Accessible by: CLINIC_ADMIN, DOCTOR (own only), ASSISTANT
    */
   weeklySlots: async (_: any, { doctorId }: { doctorId: string }, ctx: Context) => {
-    return weeklySlotService(ctx).getByDoctor(doctorId);
+    return weeklySlotService(ctx as AuthenticatedContext).getByDoctor(doctorId);
   },
 
   /**
@@ -15,7 +15,7 @@ export const weeklySlotQueries = {
    * Accessible by: CLINIC_ADMIN, DOCTOR (own only), ASSISTANT
    */
   weeklySlot: async (_: any, { id }: { id: string }, ctx: Context) => {
-    return weeklySlotService(ctx).getById(id);
+    return weeklySlotService(ctx as AuthenticatedContext).getById(id);
   },
 
   /**
@@ -23,7 +23,7 @@ export const weeklySlotQueries = {
    * Accessible by: DOCTOR
    */
   myWeeklySlots: async (_: any, __: any, ctx: Context) => {
-    return weeklySlotService(ctx).getMySlots();
+    return weeklySlotService(ctx as AuthenticatedContext).getMySlots();
   },
 
   /**
@@ -31,6 +31,6 @@ export const weeklySlotQueries = {
    * Accessible by: CLINIC_ADMIN, DOCTOR (own only), ASSISTANT
    */
   activeWeeklySlots: async (_: any, { doctorId }: { doctorId: string }, ctx: Context) => {
-    return weeklySlotService(ctx).getActiveByDoctor(doctorId);
+    return weeklySlotService(ctx as AuthenticatedContext).getActiveByDoctor(doctorId);
   },
 };

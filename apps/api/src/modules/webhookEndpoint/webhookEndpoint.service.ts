@@ -374,6 +374,8 @@ export const webhookEndpointService = (ctx: AuthenticatedContext) => {
         // Record failure
         await repo.recordFailure(id);
 
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+
         // Audit log
         await ctx.audit?.log({
           clinicId: ctx.clinicId,
@@ -383,11 +385,11 @@ export const webhookEndpointService = (ctx: AuthenticatedContext) => {
           entityId: id,
           metadata: {
             success: false,
-            error: error.message,
+            error: errorMessage,
           },
         });
 
-        throw new GraphQLError(`Webhook test failed: ${error.message}`, {
+        throw new GraphQLError(`Webhook test failed: ${errorMessage}`, {
           extensions: { code: 'WEBHOOK_TEST_FAILED' },
         });
       }

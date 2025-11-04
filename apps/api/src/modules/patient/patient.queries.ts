@@ -1,5 +1,5 @@
 import { patientService } from './patient.service';
-import type { Context } from '../../common/types/context';
+import type { Context, AuthenticatedContext } from '../../common/types/context';
 
 export interface PatientsArgs {
   search?: {
@@ -15,7 +15,7 @@ export const patientQueries = {
    * Accessible by: CLINIC_ADMIN, DOCTOR (own patients only), ASSISTANT
    */
   patients: async (_: any, { search }: PatientsArgs, ctx: Context) => {
-    return patientService(ctx).list(search);
+    return patientService(ctx as AuthenticatedContext).list(search);
   },
 
   /**
@@ -23,7 +23,7 @@ export const patientQueries = {
    * Accessible by: CLINIC_ADMIN, DOCTOR (if has appointments with patient), ASSISTANT, PATIENT (own profile only)
    */
   patient: async (_: any, { id }: { id: string }, ctx: Context) => {
-    return patientService(ctx).getById(id);
+    return patientService(ctx as AuthenticatedContext).getById(id);
   },
 
   /**
@@ -31,6 +31,6 @@ export const patientQueries = {
    * Accessible by: PATIENT
    */
   myPatientProfile: async (_: any, __: any, ctx: Context) => {
-    return patientService(ctx).getMyProfile();
+    return patientService(ctx as AuthenticatedContext).getMyProfile();
   },
 };

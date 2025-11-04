@@ -1,5 +1,5 @@
 import type { UserService } from './user.service';
-import type { Context } from '../../common/types/context';
+import type { Context, AuthenticatedContext } from '../../common/types/context';
 import type { Role } from '@prisma/client';
 
 export interface GetUsersArgs {
@@ -22,14 +22,14 @@ export function createUserQueries(service: UserService) {
      * Get a single user by ID
      */
     user: async (_parent: unknown, args: GetUserArgs, context: Context) => {
-      return service.getUserById(args.id, context);
+      return service.getUserById(args.id, context as AuthenticatedContext);
     },
 
     /**
      * Get all users in the clinic with optional filters
      */
     users: async (_parent: unknown, args: GetUsersArgs, context: Context) => {
-      return service.getUsers(context, {
+      return service.getUsers(context as AuthenticatedContext, {
         role: args.role,
         active: args.active,
         search: args.search,
@@ -40,7 +40,7 @@ export function createUserQueries(service: UserService) {
      * Search users by name or email
      */
     searchUsers: async (_parent: unknown, args: { query: string }, context: Context) => {
-      return service.searchUsers(args.query, context);
+      return service.searchUsers(args.query, context as AuthenticatedContext);
     },
   };
 }

@@ -1,5 +1,5 @@
 import { auditLogService } from './auditLog.service';
-import type { Context } from '../../common/types/context';
+import type { Context, AuthenticatedContext } from '../../common/types/context';
 
 export const auditLogMutations = {
   /**
@@ -8,7 +8,7 @@ export const auditLogMutations = {
    * Note: This is primarily for manual audit log creation. Most audit logs are created automatically by other services.
    */
   createAuditLog: async (_: any, { data }: { data: any }, ctx: Context) => {
-    return auditLogService(ctx).create(data);
+    return auditLogService(ctx as AuthenticatedContext).create(data);
   },
 
   /**
@@ -17,7 +17,7 @@ export const auditLogMutations = {
    * WARNING: Use with caution. Deleting audit logs should only be done for compliance reasons (e.g., GDPR).
    */
   deleteAuditLog: async (_: any, { id }: { id: string }, ctx: Context) => {
-    return auditLogService(ctx).delete(id);
+    return auditLogService(ctx as AuthenticatedContext).delete(id);
   },
 
   /**
@@ -30,6 +30,6 @@ export const auditLogMutations = {
     { entity, entityId }: { entity: string; entityId: string },
     ctx: Context
   ) => {
-    return auditLogService(ctx).deleteByEntity(entity, entityId);
+    return auditLogService(ctx as AuthenticatedContext).deleteByEntity(entity, entityId);
   },
 };

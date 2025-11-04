@@ -1,5 +1,5 @@
 import { webhookEndpointService } from './webhookEndpoint.service';
-import type { Context } from '../../common/types/context';
+import type { Context, AuthenticatedContext } from '../../common/types/context';
 
 export const webhookEndpointQueries = {
   /**
@@ -11,7 +11,7 @@ export const webhookEndpointQueries = {
     { filter }: { filter?: any },
     ctx: Context
   ) => {
-    return webhookEndpointService(ctx).getWebhooks(filter);
+    return webhookEndpointService(ctx as AuthenticatedContext).getWebhooks(filter);
   },
 
   /**
@@ -19,7 +19,7 @@ export const webhookEndpointQueries = {
    * Accessible by: CLINIC_ADMIN
    */
   webhookEndpoint: async (_: any, { id }: { id: string }, ctx: Context) => {
-    return webhookEndpointService(ctx).getById(id);
+    return webhookEndpointService(ctx as AuthenticatedContext).getById(id);
   },
 
   /**
@@ -27,6 +27,6 @@ export const webhookEndpointQueries = {
    * Accessible by: CLINIC_ADMIN
    */
   activeWebhookEndpoints: async (_: any, __: any, ctx: Context) => {
-    return webhookEndpointService(ctx).getActiveWebhooks();
+    return webhookEndpointService(ctx as AuthenticatedContext).getActiveWebhooks();
   },
 };

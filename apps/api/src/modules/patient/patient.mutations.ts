@@ -1,5 +1,5 @@
 import { patientService } from './patient.service';
-import type { Context } from '../../common/types/context';
+import type { Context, AuthenticatedContext } from '../../common/types/context';
 
 export interface CreatePatientArgs {
   data: {
@@ -43,7 +43,7 @@ export const patientMutations = {
    * Accessible by: CLINIC_ADMIN, ASSISTANT
    */
   createPatient: async (_: any, { data }: CreatePatientArgs, ctx: Context) => {
-    return patientService(ctx).create(data);
+    return patientService(ctx as AuthenticatedContext).create(data);
   },
 
   /**
@@ -51,7 +51,7 @@ export const patientMutations = {
    * Accessible by: CLINIC_ADMIN, ASSISTANT (any patient), PATIENT (own profile only, limited fields)
    */
   updatePatient: async (_: any, { id, data }: UpdatePatientArgs, ctx: Context) => {
-    return patientService(ctx).update(id, data);
+    return patientService(ctx as AuthenticatedContext).update(id, data);
   },
 
   /**
@@ -59,6 +59,6 @@ export const patientMutations = {
    * Accessible by: CLINIC_ADMIN
    */
   deletePatient: async (_: any, { id }: DeletePatientArgs, ctx: Context) => {
-    return patientService(ctx).delete(id);
+    return patientService(ctx as AuthenticatedContext).delete(id);
   },
 };

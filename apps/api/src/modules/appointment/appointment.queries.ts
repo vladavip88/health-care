@@ -1,5 +1,5 @@
 import { appointmentService } from './appointment.service';
-import type { Context } from '../../common/types/context';
+import type { Context, AuthenticatedContext } from '../../common/types/context';
 import { AppointmentStatus } from '@prisma/client';
 
 export interface AppointmentsArgs {
@@ -27,7 +27,7 @@ export const appointmentQueries = {
    * Accessible by: CLINIC_ADMIN, DOCTOR (own only), ASSISTANT, PATIENT (own only)
    */
   appointments: async (_: any, { filter }: AppointmentsArgs, ctx: Context) => {
-    return appointmentService(ctx).list(filter);
+    return appointmentService(ctx as AuthenticatedContext).list(filter);
   },
 
   /**
@@ -35,7 +35,7 @@ export const appointmentQueries = {
    * Accessible by: CLINIC_ADMIN, DOCTOR (if theirs), ASSISTANT, PATIENT (if theirs)
    */
   appointment: async (_: any, { id }: { id: string }, ctx: Context) => {
-    return appointmentService(ctx).getById(id);
+    return appointmentService(ctx as AuthenticatedContext).getById(id);
   },
 
   /**
@@ -43,7 +43,7 @@ export const appointmentQueries = {
    * Accessible by: PATIENT
    */
   myAppointments: async (_: any, { filter }: AppointmentsArgs, ctx: Context) => {
-    return appointmentService(ctx).getMyAppointments(filter);
+    return appointmentService(ctx as AuthenticatedContext).getMyAppointments(filter);
   },
 
   /**
@@ -51,6 +51,6 @@ export const appointmentQueries = {
    * Accessible by: CLINIC_ADMIN, DOCTOR (own only), ASSISTANT
    */
   doctorAppointments: async (_: any, { doctorId, filter }: DoctorAppointmentsArgs, ctx: Context) => {
-    return appointmentService(ctx).getDoctorAppointments(doctorId, filter);
+    return appointmentService(ctx as AuthenticatedContext).getDoctorAppointments(doctorId, filter);
   },
 };

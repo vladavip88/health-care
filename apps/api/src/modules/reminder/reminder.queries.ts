@@ -1,5 +1,5 @@
 import { reminderService } from './reminder.service';
-import type { Context } from '../../common/types/context';
+import type { Context, AuthenticatedContext } from '../../common/types/context';
 
 export const reminderQueries = {
   // ==================== ReminderRule Queries ====================
@@ -9,7 +9,7 @@ export const reminderQueries = {
    * Accessible by: CLINIC_ADMIN, ASSISTANT
    */
   reminderRules: async (_: any, __: any, ctx: Context) => {
-    return reminderService(ctx).getRules();
+    return reminderService(ctx as AuthenticatedContext).getRules();
   },
 
   /**
@@ -17,7 +17,7 @@ export const reminderQueries = {
    * Accessible by: CLINIC_ADMIN, ASSISTANT
    */
   reminderRule: async (_: any, { id }: { id: string }, ctx: Context) => {
-    return reminderService(ctx).getRuleById(id);
+    return reminderService(ctx as AuthenticatedContext).getRuleById(id);
   },
 
   /**
@@ -25,7 +25,7 @@ export const reminderQueries = {
    * Accessible by: CLINIC_ADMIN, ASSISTANT
    */
   activeReminderRules: async (_: any, __: any, ctx: Context) => {
-    return reminderService(ctx).getActiveRules();
+    return reminderService(ctx as AuthenticatedContext).getActiveRules();
   },
 
   // ==================== Reminder Queries ====================
@@ -39,7 +39,7 @@ export const reminderQueries = {
     { filter }: { filter?: any },
     ctx: Context
   ) => {
-    return reminderService(ctx).getReminders(filter);
+    return reminderService(ctx as AuthenticatedContext).getReminders(filter);
   },
 
   /**
@@ -47,7 +47,7 @@ export const reminderQueries = {
    * Accessible by: CLINIC_ADMIN, ASSISTANT, DOCTOR (own appointments only)
    */
   reminder: async (_: any, { id }: { id: string }, ctx: Context) => {
-    return reminderService(ctx).getReminderById(id);
+    return reminderService(ctx as AuthenticatedContext).getReminderById(id);
   },
 
   /**
@@ -59,6 +59,6 @@ export const reminderQueries = {
     { appointmentId }: { appointmentId: string },
     ctx: Context
   ) => {
-    return reminderService(ctx).getRemindersByAppointment(appointmentId);
+    return reminderService(ctx as AuthenticatedContext).getRemindersByAppointment(appointmentId);
   },
 };

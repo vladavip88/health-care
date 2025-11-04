@@ -1,5 +1,5 @@
 import { doctorService } from './doctor.service';
-import type { Context } from '../../common/types/context';
+import type { Context, AuthenticatedContext } from '../../common/types/context';
 
 export const doctorQueries = {
   /**
@@ -7,7 +7,7 @@ export const doctorQueries = {
    * Accessible by: CLINIC_ADMIN, ASSISTANT
    */
   doctors: async (_: any, __: any, ctx: Context) => {
-    return doctorService(ctx).list();
+    return doctorService(ctx as AuthenticatedContext).list();
   },
 
   /**
@@ -15,7 +15,7 @@ export const doctorQueries = {
    * Accessible by: CLINIC_ADMIN, ASSISTANT, DOCTOR (own profile only)
    */
   doctor: async (_: any, { id }: { id: string }, ctx: Context) => {
-    return doctorService(ctx).getById(id);
+    return doctorService(ctx as AuthenticatedContext).getById(id);
   },
 
   /**
@@ -23,6 +23,6 @@ export const doctorQueries = {
    * Accessible by: DOCTOR
    */
   myDoctorProfile: async (_: any, __: any, ctx: Context) => {
-    return doctorService(ctx).getMyProfile();
+    return doctorService(ctx as AuthenticatedContext).getMyProfile();
   },
 };

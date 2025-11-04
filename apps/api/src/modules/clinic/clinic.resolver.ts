@@ -3,7 +3,6 @@ import { createClinicRepository } from './clinic.repository';
 import { createClinicService } from './clinic.service';
 import { createClinicQueries } from './clinic.queries';
 import { createClinicMutations } from './clinic.mutations';
-import type { Context } from '../../common/types/context';
 
 // Initialize the layers
 const clinicRepository = createClinicRepository(prisma);
