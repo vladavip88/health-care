@@ -1,7 +1,7 @@
 import { GraphQLError } from 'graphql';
 import type { Clinic } from '@prisma/client';
 import type { ClinicRepository, ClinicFilters } from './clinic.repository';
-import type { Context } from '../../common/types/context';
+import type { AuthenticatedContext } from '../../common/types/context';
 import { PERMISSIONS } from '../../common/auth/permissions';
 
 export interface CreateClinicInput {
@@ -51,7 +51,7 @@ export function createClinicService(repository: ClinicRepository) {
      * Get clinic by ID
      * Users can only access their own clinic
      */
-    async getClinicById(id: string, context: Context): Promise<Clinic | null> {
+    async getClinicById(id: string, context: AuthenticatedContext): Promise<Clinic | null> {
       if (!context.user) {
         throw new GraphQLError('Unauthorized: User not authenticated', {
           extensions: { code: 'UNAUTHENTICATED' },
@@ -72,14 +72,14 @@ export function createClinicService(repository: ClinicRepository) {
      * Get current user's clinic
      * Returns clinic with statistics
      */
-    async getCurrentClinic(context: Context) {
+    async getCurrentClinic(context: AuthenticatedContext) {
       if (!context.user) {
         throw new GraphQLError('Unauthorized: User not authenticated', {
           extensions: { code: 'UNAUTHENTICATED' },
         });
       }
 
-      const clinic = await repository.findByIdWithRelations(context.clinicId!);
+      const clinic = await repository.findByIdWithRelations(context.clinicId);
       if (!clinic) {
         throw new GraphQLError('Clinic not found', {
           extensions: { code: 'NOT_FOUND' },
@@ -93,7 +93,7 @@ export function createClinicService(repository: ClinicRepository) {
      * Get clinic statistics
      * Only CLINIC_ADMIN can view stats
      */
-    async getClinicStats(context: Context) {
+    async getClinicStats(context: AuthenticatedContext) {
       if (!context.user) {
         throw new GraphQLError('Unauthorized: User not authenticated', {
           extensions: { code: 'UNAUTHENTICATED' },
@@ -106,14 +106,14 @@ export function createClinicService(repository: ClinicRepository) {
         });
       }
 
-      return repository.getStats(context.clinicId!);
+      return repository.getStats(context.clinicId);
     },
 
     /**
      * Get all clinics (SUPER_ADMIN only - not implemented in RBAC yet)
      * This would be used by platform administrators
      */
-    async getClinics(context: Context, filters?: ClinicFilters): Promise<Clinic[]> {
+    async getClinics(context: AuthenticatedContext, filters?: ClinicFilters): Promise<Clinic[]> {
       if (!context.user) {
         throw new GraphQLError('Unauthorized: User not authenticated', {
           extensions: { code: 'UNAUTHENTICATED' },
@@ -128,7 +128,7 @@ export function createClinicService(repository: ClinicRepository) {
       }
 
       // Users can only see their own clinic
-      const clinic = await repository.findById(context.clinicId!);
+      const clinic = await repository.findById(context.clinicId);
       return clinic ? [clinic] : [];
     },
 
@@ -137,7 +137,7 @@ export function createClinicService(repository: ClinicRepository) {
      * This would typically be done during registration/onboarding
      * For now, restricted to prevent unauthorized clinic creation
      */
-    async createClinic(input: CreateClinicInput, context: Context): Promise<Clinic> {
+    async createClinic(input: CreateClinicInput, context: AuthenticatedContext): Promise<Clinic> {
       if (!context.user) {
         throw new GraphQLError('Unauthorized: User not authenticated', {
           extensions: { code: 'UNAUTHENTICATED' },
@@ -159,7 +159,7 @@ export function createClinicService(repository: ClinicRepository) {
      * Update clinic settings
      * Only CLINIC_ADMIN can update their own clinic
      */
-    async updateClinic(input: UpdateClinicInput, context: Context): Promise<Clinic> {
+    async updateClinic(input: UpdateClinicInput, context: AuthenticatedContext): Promise<Clinic> {
       if (!context.user) {
         throw new GraphQLError('Unauthorized: User not authenticated', {
           extensions: { code: 'UNAUTHENTICATED' },
@@ -194,7 +194,7 @@ export function createClinicService(repository: ClinicRepository) {
      * Update clinic subscription
      * Only CLINIC_ADMIN can update subscription
      */
-    async updateSubscription(input: UpdateSubscriptionInput, context: Context): Promise<Clinic> {
+    async updateSubscription(input: UpdateSubscriptionInput, context: AuthenticatedContext): Promise<Clinic> {
       if (!context.user) {
         throw new GraphQLError('Unauthorized: User not authenticated', {
           extensions: { code: 'UNAUTHENTICATED' },
@@ -228,7 +228,7 @@ export function createClinicService(repository: ClinicRepository) {
      * Delete clinic
      * Restricted - clinics should rarely be deleted
      */
-    async deleteClinic(id: string, context: Context): Promise<Clinic> {
+    async deleteClinic(id: string, context: AuthenticatedContext): Promise<Clinic> {
       if (!context.user) {
         throw new GraphQLError('Unauthorized: User not authenticated', {
           extensions: { code: 'UNAUTHENTICATED' },

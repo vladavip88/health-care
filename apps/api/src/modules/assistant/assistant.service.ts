@@ -1,6 +1,6 @@
 import { GraphQLError } from 'graphql';
 import { assistantRepository } from './assistant.repository';
-import type { Context } from '../../common/types/context';
+import type { AuthenticatedContext } from '../../common/types/context';
 
 interface CreateAssistantInput {
   userId: string;
@@ -15,7 +15,7 @@ interface UpdateAssistantInput {
   active?: boolean;
 }
 
-export const assistantService = (ctx: Context) => {
+export const assistantService = (ctx: AuthenticatedContext) => {
   const repo = assistantRepository(ctx.prisma);
 
   return {

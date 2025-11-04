@@ -1,6 +1,6 @@
 import { GraphQLError } from 'graphql';
 import { doctorRepository } from './doctor.repository';
-import type { Context } from '../../common/types/context';
+import type { AuthenticatedContext } from '../../common/types/context';
 
 interface CreateDoctorInput {
   userId: string;
@@ -25,7 +25,7 @@ interface UpdateDoctorInput {
   timezone?: string;
 }
 
-export const doctorService = (ctx: Context) => {
+export const doctorService = (ctx: AuthenticatedContext) => {
   const repo = doctorRepository(ctx.prisma);
 
   return {

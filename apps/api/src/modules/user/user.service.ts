@@ -1,7 +1,7 @@
 import { GraphQLError } from 'graphql';
 import type { Role, User } from '@prisma/client';
 import type { UserRepository, CreateUserData, UpdateUserData, UserFilters } from './user.repository';
-import type { Context } from '../../common/types/context';
+import type { AuthenticatedContext } from '../../common/types/context';
 import { PERMISSIONS } from '../../common/auth/permissions';
 
 export interface CreateUserInput {
@@ -32,7 +32,7 @@ export function createUserService(repository: UserRepository) {
      * Get user by ID
      * Validates tenancy and permissions
      */
-    async getUserById(id: string, context: Context): Promise<User | null> {
+    async getUserById(id: string, context: AuthenticatedContext): Promise<User | null> {
       if (!context.user) {
         throw new GraphQLError('Unauthorized: User not authenticated', {
           extensions: { code: 'UNAUTHENTICATED' },
@@ -69,7 +69,7 @@ export function createUserService(repository: UserRepository) {
      * Get all users in the clinic
      * Enforces tenancy and requires USER_READ permission
      */
-    async getUsers(context: Context, filters?: Omit<UserFilters, 'clinicId'>): Promise<User[]> {
+    async getUsers(context: AuthenticatedContext, filters?: Omit<UserFilters, 'clinicId'>): Promise<User[]> {
       if (!context.user) {
         throw new GraphQLError('Unauthorized: User not authenticated', {
           extensions: { code: 'UNAUTHENTICATED' },
@@ -93,7 +93,7 @@ export function createUserService(repository: UserRepository) {
      * Create a new user
      * Validates permissions, email uniqueness, and tenancy
      */
-    async createUser(input: CreateUserInput, context: Context): Promise<User> {
+    async createUser(input: CreateUserInput, context: AuthenticatedContext): Promise<User> {
       if (!context.user) {
         throw new GraphQLError('Unauthorized: User not authenticated', {
           extensions: { code: 'UNAUTHENTICATED' },
@@ -146,7 +146,7 @@ export function createUserService(repository: UserRepository) {
      * Update an existing user
      * Validates permissions and tenancy
      */
-    async updateUser(input: UpdateUserInput, context: Context): Promise<User> {
+    async updateUser(input: UpdateUserInput, context: AuthenticatedContext): Promise<User> {
       if (!context.user) {
         throw new GraphQLError('Unauthorized: User not authenticated', {
           extensions: { code: 'UNAUTHENTICATED' },
@@ -198,7 +198,7 @@ export function createUserService(repository: UserRepository) {
      * Delete a user (soft delete recommended)
      * Validates permissions and tenancy
      */
-    async deleteUser(id: string, context: Context): Promise<User> {
+    async deleteUser(id: string, context: AuthenticatedContext): Promise<User> {
       if (!context.user) {
         throw new GraphQLError('Unauthorized: User not authenticated', {
           extensions: { code: 'UNAUTHENTICATED' },
@@ -240,7 +240,7 @@ export function createUserService(repository: UserRepository) {
     /**
      * Search users in the clinic
      */
-    async searchUsers(search: string, context: Context): Promise<User[]> {
+    async searchUsers(search: string, context: AuthenticatedContext): Promise<User[]> {
       if (!context.user) {
         throw new GraphQLError('Unauthorized: User not authenticated', {
           extensions: { code: 'UNAUTHENTICATED' },

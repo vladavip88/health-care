@@ -10,7 +10,7 @@
       "path": "./apps/client"
     },
     {
-      "path": "./api"
+      "path": "./apps/api"
     }
   ]
 }

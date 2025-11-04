@@ -1,6 +1,6 @@
 import { GraphQLError } from 'graphql';
 import { weeklySlotRepository } from './weeklySlot.repository';
-import type { Context } from '../../common/types/context';
+import type { AuthenticatedContext } from '../../common/types/context';
 
 interface CreateWeeklySlotInput {
   doctorId: string;
@@ -32,7 +32,7 @@ interface BulkCreateWeeklySlotInput {
   slots: WeeklySlotDataInput[];
 }
 
-export const weeklySlotService = (ctx: Context) => {
+export const weeklySlotService = (ctx: AuthenticatedContext) => {
   const repo = weeklySlotRepository(ctx.prisma);
 
   /**

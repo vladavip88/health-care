@@ -1,6 +1,6 @@
 import { GraphQLError } from 'graphql';
 import { webhookEndpointRepository } from './webhookEndpoint.repository';
-import type { Context } from '../../common/types/context';
+import type { AuthenticatedContext } from '../../common/types/context';
 import crypto from 'crypto';
 
 interface CreateWebhookEndpointInput {
@@ -38,7 +38,7 @@ const VALID_EVENTS = [
   'reminder.failed',
 ];
 
-export const webhookEndpointService = (ctx: Context) => {
+export const webhookEndpointService = (ctx: AuthenticatedContext) => {
   const repo = webhookEndpointRepository(ctx.prisma);
 
   // ==================== Validation Methods ====================

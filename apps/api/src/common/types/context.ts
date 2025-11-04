@@ -31,4 +31,24 @@ export interface Context {
     remindersByAppointment: DataLoader<string, Reminder[]>;
     reminderRule: DataLoader<string, ReminderRule | null>;
   };
+  audit?: {
+    log: (params: {
+      clinicId: string;
+      actorId: string;
+      action: string;
+      entity: string;
+      entityId: string;
+      appointmentId?: string;
+      metadata?: any;
+    }) => Promise<void>;
+  };
+}
+
+/**
+ * Authenticated Context - Used in services that require authentication
+ * This ensures user and clinicId are always present
+ */
+export interface AuthenticatedContext extends Context {
+  user: AuthUser;
+  clinicId: string;
 }

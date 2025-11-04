@@ -1,7 +1,7 @@
 import { GraphQLError } from 'graphql';
 import { AppointmentStatus, AppointmentSource } from '@prisma/client';
 import { appointmentRepository } from './appointment.repository';
-import type { Context } from '../../common/types/context';
+import type { AuthenticatedContext } from '../../common/types/context';
 
 interface CreateAppointmentInput {
   doctorId: string;
@@ -30,7 +30,7 @@ interface AppointmentFilterInput {
   endDate?: Date;
 }
 
-export const appointmentService = (ctx: Context) => {
+export const appointmentService = (ctx: AuthenticatedContext) => {
   const repo = appointmentRepository(ctx.prisma);
 
   return {

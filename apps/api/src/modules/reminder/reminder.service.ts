@@ -1,6 +1,6 @@
 import { GraphQLError } from 'graphql';
 import { reminderRepository } from './reminder.repository';
-import type { Context } from '../../common/types/context';
+import type { AuthenticatedContext } from '../../common/types/context';
 import { ReminderStatus } from '@prisma/client';
 
 interface CreateReminderRuleInput {
@@ -25,7 +25,7 @@ interface ReminderFilterInput {
   scheduledBefore?: Date;
 }
 
-export const reminderService = (ctx: Context) => {
+export const reminderService = (ctx: AuthenticatedContext) => {
   const repo = reminderRepository(ctx.prisma);
 
   // ==================== Validation Methods ====================

@@ -1,6 +1,6 @@
 import { GraphQLError } from 'graphql';
 import { auditLogRepository } from './auditLog.repository';
-import type { Context } from '../../common/types/context';
+import type { AuthenticatedContext } from '../../common/types/context';
 
 interface AuditLogFilterInput {
   actorId?: string;
@@ -22,7 +22,7 @@ interface CreateAuditLogInput {
   appointmentId?: string;
 }
 
-export const auditLogService = (ctx: Context) => {
+export const auditLogService = (ctx: AuthenticatedContext) => {
   const repo = auditLogRepository(ctx.prisma);
 
   // ==================== Validation Methods ====================
