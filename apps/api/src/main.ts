@@ -28,6 +28,7 @@ import {
   createRemindersByAppointmentLoader,
   createReminderRuleLoader,
 } from './modules/reminder/reminder.dataloader';
+import { auditLogRepository } from './modules/auditLog/auditLog.repository';
 
 const port = process.env.PORT ? Number(process.env.PORT) : 3000;
 
@@ -51,9 +52,12 @@ const server = new ApolloServer<Context>({
 async function startServer() {
   const { url } = await startStandaloneServer(server, {
     listen: { port },
-    context: async ({ req }) => {
+    context: async ({ req }): Promise<Context> => {
       // Authenticate user from Authorization header
       const user = await authenticateUser(req.headers.authorization);
+
+      // Initialize audit log repository
+      const auditRepo = auditLogRepository(prisma);
 
       // Initialize all DataLoaders (unique per request)
       return {
@@ -77,6 +81,24 @@ async function startServer() {
           reminder: createReminderLoader(prisma),
           remindersByAppointment: createRemindersByAppointmentLoader(prisma),
           reminderRule: createReminderRuleLoader(prisma),
+        },
+        audit: {
+          log: async (params) => {
+            try {
+              await auditRepo.create({
+                action: params.action,
+                entity: params.entity,
+                entityId: params.entityId,
+                metadata: params.metadata,
+                clinic: { connect: { id: params.clinicId } },
+                actor: params.actorId ? { connect: { id: params.actorId } } : undefined,
+                appointment: params.appointmentId ? { connect: { id: params.appointmentId } } : undefined,
+              });
+            } catch (error) {
+              // Log errors but don't throw - audit logging should never break the main operation
+              console.error('Failed to create audit log:', error);
+            }
+          },
         },
       };
     },

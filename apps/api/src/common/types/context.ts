@@ -9,13 +9,19 @@ export interface AuthUser {
   permissions?: string[];
 }
 
+/**
+ * Safe User type without sensitive fields like passwordHash
+ * This is what DataLoaders return to prevent exposing sensitive data
+ */
+export type SafeUser = Omit<User, 'passwordHash'>;
+
 export interface Context {
   prisma: PrismaClient;
   user?: AuthUser;
   clinicId?: string;
   loaders: {
     clinic: DataLoader<string, Clinic | null>;
-    user: DataLoader<string, User | null>;
+    user: DataLoader<string, SafeUser | null>;
     doctor: DataLoader<string, Doctor | null>;
     doctorByUserId: DataLoader<string, Doctor | null>;
     assistant: DataLoader<string, Assistant | null>;

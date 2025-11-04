@@ -18,6 +18,10 @@ export const userSchema = gql`
     createdAt: String!
     updatedAt: String!
     clinicId: String!
+    clinic: Clinic
+    doctor: Doctor
+    assistant: Assistant
+    patient: Patient
   }
 
   enum Role {
