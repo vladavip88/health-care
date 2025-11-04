@@ -14,6 +14,7 @@ export const userSchema = gql`
     role: Role!
     active: Boolean!
     emailVerified: Boolean!
+    lastLoginAt: String
     createdAt: String!
     updatedAt: String!
     clinicId: String!
