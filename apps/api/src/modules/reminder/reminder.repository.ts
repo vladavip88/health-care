@@ -5,39 +5,32 @@ export const reminderRepository = (prisma: PrismaClient) => ({
 
   /**
    * Find reminder rule by ID
+   * Nested relations are resolved by their respective DataLoaders
    */
   findRuleById: (id: string) =>
     prisma.reminderRule.findUnique({
       where: { id },
-      include: {
-        clinic: true,
-        reminders: true,
-      },
     }),
 
   /**
    * Find all reminder rules for a clinic
+   * Nested relations are resolved by their respective DataLoaders
    */
   findRulesByClinic: (clinicId: string) =>
     prisma.reminderRule.findMany({
       where: { clinicId },
-      include: {
-        clinic: true,
-      },
       orderBy: [{ offsetMin: 'desc' }, { channel: 'asc' }],
     }),
 
   /**
    * Find active reminder rules for a clinic
+   * Nested relations are resolved by their respective DataLoaders
    */
   findActiveRulesByClinic: (clinicId: string) =>
     prisma.reminderRule.findMany({
       where: {
         clinicId,
         active: true,
-      },
-      include: {
-        clinic: true,
       },
       orderBy: [{ offsetMin: 'desc' }, { channel: 'asc' }],
     }),
@@ -56,64 +49,50 @@ export const reminderRepository = (prisma: PrismaClient) => ({
 
   /**
    * Create a new reminder rule
+   * Nested relations are resolved by their respective DataLoaders
    */
   createRule: (data: Prisma.ReminderRuleCreateInput) =>
     prisma.reminderRule.create({
       data,
-      include: {
-        clinic: true,
-        reminders: true,
-      },
     }),
 
   /**
    * Update reminder rule by ID
+   * Nested relations are resolved by their respective DataLoaders
    */
   updateRule: (id: string, data: Prisma.ReminderRuleUpdateInput) =>
     prisma.reminderRule.update({
       where: { id },
       data,
-      include: {
-        clinic: true,
-        reminders: true,
-      },
     }),
 
   /**
    * Activate reminder rule
+   * Nested relations are resolved by their respective DataLoaders
    */
   activateRule: (id: string) =>
     prisma.reminderRule.update({
       where: { id },
       data: { active: true },
-      include: {
-        clinic: true,
-        reminders: true,
-      },
     }),
 
   /**
    * Deactivate reminder rule
+   * Nested relations are resolved by their respective DataLoaders
    */
   deactivateRule: (id: string) =>
     prisma.reminderRule.update({
       where: { id },
       data: { active: false },
-      include: {
-        clinic: true,
-        reminders: true,
-      },
     }),
 
   /**
    * Delete reminder rule by ID
+   * Nested relations are resolved by their respective DataLoaders
    */
   deleteRule: (id: string) =>
     prisma.reminderRule.delete({
       where: { id },
-      include: {
-        clinic: true,
-      },
     }),
 
   /**
@@ -139,27 +118,16 @@ export const reminderRepository = (prisma: PrismaClient) => ({
 
   /**
    * Find reminder by ID
+   * Nested relations are resolved by their respective DataLoaders
    */
   findReminderById: (id: string) =>
     prisma.reminder.findUnique({
       where: { id },
-      include: {
-        appointment: {
-          include: {
-            doctor: {
-              include: {
-                clinic: true,
-              },
-            },
-            patient: true,
-          },
-        },
-        rule: true,
-      },
     }),
 
   /**
    * Find reminders with filters
+   * Nested relations are resolved by their respective DataLoaders
    */
   findReminders: (clinicId: string, filter?: {
     appointmentId?: string;
@@ -200,39 +168,23 @@ export const reminderRepository = (prisma: PrismaClient) => ({
 
     return prisma.reminder.findMany({
       where,
-      include: {
-        appointment: {
-          include: {
-            doctor: true,
-            patient: true,
-          },
-        },
-        rule: true,
-      },
       orderBy: { scheduledFor: 'asc' },
     });
   },
 
   /**
    * Find reminders for a specific appointment
+   * Nested relations are resolved by their respective DataLoaders
    */
   findRemindersByAppointment: (appointmentId: string) =>
     prisma.reminder.findMany({
       where: { appointmentId },
-      include: {
-        appointment: {
-          include: {
-            doctor: true,
-            patient: true,
-          },
-        },
-        rule: true,
-      },
       orderBy: { scheduledFor: 'asc' },
     }),
 
   /**
    * Find scheduled reminders that need to be sent
+   * Nested relations are resolved by their respective DataLoaders
    */
   findDueReminders: (beforeDate: Date) =>
     prisma.reminder.findMany({
@@ -241,15 +193,6 @@ export const reminderRepository = (prisma: PrismaClient) => ({
         scheduledFor: {
           lte: beforeDate,
         },
-      },
-      include: {
-        appointment: {
-          include: {
-            doctor: true,
-            patient: true,
-          },
-        },
-        rule: true,
       },
       orderBy: { scheduledFor: 'asc' },
     }),
@@ -267,19 +210,11 @@ export const reminderRepository = (prisma: PrismaClient) => ({
 
   /**
    * Create a new reminder
+   * Nested relations are resolved by their respective DataLoaders
    */
   createReminder: (data: Prisma.ReminderCreateInput) =>
     prisma.reminder.create({
       data,
-      include: {
-        appointment: {
-          include: {
-            doctor: true,
-            patient: true,
-          },
-        },
-        rule: true,
-      },
     }),
 
   /**
@@ -293,24 +228,17 @@ export const reminderRepository = (prisma: PrismaClient) => ({
 
   /**
    * Update reminder by ID
+   * Nested relations are resolved by their respective DataLoaders
    */
   updateReminder: (id: string, data: Prisma.ReminderUpdateInput) =>
     prisma.reminder.update({
       where: { id },
       data,
-      include: {
-        appointment: {
-          include: {
-            doctor: true,
-            patient: true,
-          },
-        },
-        rule: true,
-      },
     }),
 
   /**
    * Mark reminder as sent
+   * Nested relations are resolved by their respective DataLoaders
    */
   markReminderSent: (id: string) =>
     prisma.reminder.update({
@@ -319,19 +247,11 @@ export const reminderRepository = (prisma: PrismaClient) => ({
         status: 'SENT',
         sentAt: new Date(),
       },
-      include: {
-        appointment: {
-          include: {
-            doctor: true,
-            patient: true,
-          },
-        },
-        rule: true,
-      },
     }),
 
   /**
    * Mark reminder as failed
+   * Nested relations are resolved by their respective DataLoaders
    */
   markReminderFailed: (id: string, error: string) =>
     prisma.reminder.update({
@@ -340,19 +260,11 @@ export const reminderRepository = (prisma: PrismaClient) => ({
         status: 'FAILED',
         error,
       },
-      include: {
-        appointment: {
-          include: {
-            doctor: true,
-            patient: true,
-          },
-        },
-        rule: true,
-      },
     }),
 
   /**
    * Mark reminder as skipped
+   * Nested relations are resolved by their respective DataLoaders
    */
   markReminderSkipped: (id: string) =>
     prisma.reminder.update({
@@ -360,27 +272,15 @@ export const reminderRepository = (prisma: PrismaClient) => ({
       data: {
         status: 'SKIPPED',
       },
-      include: {
-        appointment: {
-          include: {
-            doctor: true,
-            patient: true,
-          },
-        },
-        rule: true,
-      },
     }),
 
   /**
    * Delete reminder by ID
+   * Nested relations are resolved by their respective DataLoaders
    */
   deleteReminder: (id: string) =>
     prisma.reminder.delete({
       where: { id },
-      include: {
-        appointment: true,
-        rule: true,
-      },
     }),
 
   /**

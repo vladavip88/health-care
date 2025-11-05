@@ -3,46 +3,20 @@ import { PrismaClient, Prisma, AppointmentStatus } from '@prisma/client';
 export const appointmentRepository = (prisma: PrismaClient) => ({
   /**
    * Find appointment by ID
+   * Nested relations (clinic, doctor, patient, createdBy, reminders) are resolved by their respective DataLoaders
    */
   findById: (id: string) =>
     prisma.appointment.findUnique({
       where: { id },
-      include: {
-        clinic: true,
-        doctor: {
-          include: {
-            user: true,
-          },
-        },
-        patient: {
-          include: {
-            user: true,
-          },
-        },
-        createdBy: true,
-        reminders: true,
-      },
     }),
 
   /**
    * Find all appointments in a clinic
+   * Nested relations (doctor, patient, createdBy) are resolved by their respective DataLoaders
    */
   findManyByClinic: (clinicId: string) =>
     prisma.appointment.findMany({
       where: { clinicId },
-      include: {
-        doctor: {
-          include: {
-            user: true,
-          },
-        },
-        patient: {
-          include: {
-            user: true,
-          },
-        },
-        createdBy: true,
-      },
       orderBy: {
         start: 'desc',
       },
@@ -50,6 +24,7 @@ export const appointmentRepository = (prisma: PrismaClient) => ({
 
   /**
    * Find appointments by doctor
+   * Nested relations (patient, createdBy) are resolved by their respective DataLoaders
    */
   findByDoctor: (doctorId: string, clinicId: string, startDate?: Date, endDate?: Date) => {
     const where: Prisma.AppointmentWhereInput = {
@@ -65,14 +40,6 @@ export const appointmentRepository = (prisma: PrismaClient) => ({
 
     return prisma.appointment.findMany({
       where,
-      include: {
-        patient: {
-          include: {
-            user: true,
-          },
-        },
-        createdBy: true,
-      },
       orderBy: {
         start: 'asc',
       },
@@ -81,6 +48,7 @@ export const appointmentRepository = (prisma: PrismaClient) => ({
 
   /**
    * Find appointments by patient
+   * Nested relations (doctor, createdBy) are resolved by their respective DataLoaders
    */
   findByPatient: (patientId: string, clinicId: string, startDate?: Date, endDate?: Date) => {
     const where: Prisma.AppointmentWhereInput = {
@@ -96,14 +64,6 @@ export const appointmentRepository = (prisma: PrismaClient) => ({
 
     return prisma.appointment.findMany({
       where,
-      include: {
-        doctor: {
-          include: {
-            user: true,
-          },
-        },
-        createdBy: true,
-      },
       orderBy: {
         start: 'desc',
       },
@@ -112,25 +72,13 @@ export const appointmentRepository = (prisma: PrismaClient) => ({
 
   /**
    * Find appointments by status
+   * Nested relations (doctor, patient, createdBy) are resolved by their respective DataLoaders
    */
   findByStatus: (clinicId: string, status: AppointmentStatus) =>
     prisma.appointment.findMany({
       where: {
         clinicId,
         status,
-      },
-      include: {
-        doctor: {
-          include: {
-            user: true,
-          },
-        },
-        patient: {
-          include: {
-            user: true,
-          },
-        },
-        createdBy: true,
       },
       orderBy: {
         start: 'asc',
@@ -139,6 +87,7 @@ export const appointmentRepository = (prisma: PrismaClient) => ({
 
   /**
    * Find appointments within date range
+   * Nested relations (doctor, patient, createdBy) are resolved by their respective DataLoaders
    */
   findByDateRange: (clinicId: string, startDate: Date, endDate: Date) =>
     prisma.appointment.findMany({
@@ -148,19 +97,6 @@ export const appointmentRepository = (prisma: PrismaClient) => ({
           gte: startDate,
           lte: endDate,
         },
-      },
-      include: {
-        doctor: {
-          include: {
-            user: true,
-          },
-        },
-        patient: {
-          include: {
-            user: true,
-          },
-        },
-        createdBy: true,
       },
       orderBy: {
         start: 'asc',
@@ -198,92 +134,40 @@ export const appointmentRepository = (prisma: PrismaClient) => ({
 
   /**
    * Create a new appointment
+   * Nested relations (clinic, doctor, patient, createdBy) are resolved by their respective DataLoaders
    */
   create: (data: Prisma.AppointmentCreateInput) =>
     prisma.appointment.create({
       data,
-      include: {
-        clinic: true,
-        doctor: {
-          include: {
-            user: true,
-          },
-        },
-        patient: {
-          include: {
-            user: true,
-          },
-        },
-        createdBy: true,
-      },
     }),
 
   /**
    * Update appointment by ID
+   * Nested relations (clinic, doctor, patient, createdBy) are resolved by their respective DataLoaders
    */
   update: (id: string, data: Prisma.AppointmentUpdateInput) =>
     prisma.appointment.update({
       where: { id },
       data,
-      include: {
-        clinic: true,
-        doctor: {
-          include: {
-            user: true,
-          },
-        },
-        patient: {
-          include: {
-            user: true,
-          },
-        },
-        createdBy: true,
-      },
     }),
 
   /**
    * Update appointment status
+   * Nested relations (clinic, doctor, patient, createdBy) are resolved by their respective DataLoaders
    */
   updateStatus: (id: string, status: AppointmentStatus) =>
     prisma.appointment.update({
       where: { id },
       data: { status },
-      include: {
-        clinic: true,
-        doctor: {
-          include: {
-            user: true,
-          },
-        },
-        patient: {
-          include: {
-            user: true,
-          },
-        },
-        createdBy: true,
-      },
     }),
 
   /**
    * Delete appointment by ID
+   * Nested relations (clinic, doctor, patient, createdBy) are resolved by their respective DataLoaders
    */
   delete: (id: string) =>
     prisma.appointment.delete({
       where: { id },
-      include: {
-        clinic: true,
-        doctor: {
-          include: {
-            user: true,
-          },
-        },
-        patient: {
-          include: {
-            user: true,
-          },
-        },
-        createdBy: true,
-      },
     }),
 
   /**
@@ -318,6 +202,7 @@ export const appointmentRepository = (prisma: PrismaClient) => ({
 
   /**
    * Get upcoming appointments for a doctor
+   * Nested relations (patient) are resolved by their respective DataLoaders
    */
   findUpcomingByDoctor: (doctorId: string, clinicId: string, limit: number = 10) =>
     prisma.appointment.findMany({
@@ -331,13 +216,6 @@ export const appointmentRepository = (prisma: PrismaClient) => ({
           in: ['PENDING', 'CONFIRMED'],
         },
       },
-      include: {
-        patient: {
-          include: {
-            user: true,
-          },
-        },
-      },
       orderBy: {
         start: 'asc',
       },
@@ -346,6 +224,7 @@ export const appointmentRepository = (prisma: PrismaClient) => ({
 
   /**
    * Get upcoming appointments for a patient
+   * Nested relations (doctor) are resolved by their respective DataLoaders
    */
   findUpcomingByPatient: (patientId: string, clinicId: string, limit: number = 10) =>
     prisma.appointment.findMany({
@@ -357,13 +236,6 @@ export const appointmentRepository = (prisma: PrismaClient) => ({
         },
         status: {
           in: ['PENDING', 'CONFIRMED'],
-        },
-      },
-      include: {
-        doctor: {
-          include: {
-            user: true,
-          },
         },
       },
       orderBy: {

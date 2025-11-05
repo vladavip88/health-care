@@ -3,29 +3,26 @@ import { PrismaClient, Prisma } from '@prisma/client';
 export const webhookEndpointRepository = (prisma: PrismaClient) => ({
   /**
    * Find webhook endpoint by ID
+   * Nested relations are resolved by their respective DataLoaders
    */
   findById: (id: string) =>
     prisma.webhookEndpoint.findUnique({
       where: { id },
-      include: {
-        clinic: true,
-      },
     }),
 
   /**
    * Find all webhook endpoints for a clinic
+   * Nested relations are resolved by their respective DataLoaders
    */
   findByClinic: (clinicId: string) =>
     prisma.webhookEndpoint.findMany({
       where: { clinicId },
-      include: {
-        clinic: true,
-      },
       orderBy: { createdAt: 'desc' },
     }),
 
   /**
    * Find active webhook endpoints for a clinic
+   * Nested relations are resolved by their respective DataLoaders
    */
   findActiveByClinic: (clinicId: string) =>
     prisma.webhookEndpoint.findMany({
@@ -33,14 +30,12 @@ export const webhookEndpointRepository = (prisma: PrismaClient) => ({
         clinicId,
         active: true,
       },
-      include: {
-        clinic: true,
-      },
       orderBy: { createdAt: 'desc' },
     }),
 
   /**
    * Find webhook endpoints by event type
+   * Nested relations are resolved by their respective DataLoaders
    */
   findByEvent: (clinicId: string, event: string) =>
     prisma.webhookEndpoint.findMany({
@@ -51,13 +46,11 @@ export const webhookEndpointRepository = (prisma: PrismaClient) => ({
           has: event,
         },
       },
-      include: {
-        clinic: true,
-      },
     }),
 
   /**
    * Find webhook endpoints with filters
+   * Nested relations are resolved by their respective DataLoaders
    */
   findWithFilters: (clinicId: string, filter?: { active?: boolean; event?: string }) => {
     const where: Prisma.WebhookEndpointWhereInput = {
@@ -76,9 +69,6 @@ export const webhookEndpointRepository = (prisma: PrismaClient) => ({
 
     return prisma.webhookEndpoint.findMany({
       where,
-      include: {
-        clinic: true,
-      },
       orderBy: { createdAt: 'desc' },
     });
   },
@@ -96,53 +86,46 @@ export const webhookEndpointRepository = (prisma: PrismaClient) => ({
 
   /**
    * Create a new webhook endpoint
+   * Nested relations are resolved by their respective DataLoaders
    */
   create: (data: Prisma.WebhookEndpointCreateInput) =>
     prisma.webhookEndpoint.create({
       data,
-      include: {
-        clinic: true,
-      },
     }),
 
   /**
    * Update webhook endpoint by ID
+   * Nested relations are resolved by their respective DataLoaders
    */
   update: (id: string, data: Prisma.WebhookEndpointUpdateInput) =>
     prisma.webhookEndpoint.update({
       where: { id },
       data,
-      include: {
-        clinic: true,
-      },
     }),
 
   /**
    * Activate webhook endpoint
+   * Nested relations are resolved by their respective DataLoaders
    */
   activate: (id: string) =>
     prisma.webhookEndpoint.update({
       where: { id },
       data: { active: true },
-      include: {
-        clinic: true,
-      },
     }),
 
   /**
    * Deactivate webhook endpoint
+   * Nested relations are resolved by their respective DataLoaders
    */
   deactivate: (id: string) =>
     prisma.webhookEndpoint.update({
       where: { id },
       data: { active: false },
-      include: {
-        clinic: true,
-      },
     }),
 
   /**
    * Update last success timestamp
+   * Nested relations are resolved by their respective DataLoaders
    */
   recordSuccess: (id: string) =>
     prisma.webhookEndpoint.update({
@@ -151,13 +134,11 @@ export const webhookEndpointRepository = (prisma: PrismaClient) => ({
         lastSuccessAt: new Date(),
         failureCount: 0,
       },
-      include: {
-        clinic: true,
-      },
     }),
 
   /**
    * Update last failure timestamp and increment failure count
+   * Nested relations are resolved by their respective DataLoaders
    */
   recordFailure: (id: string) =>
     prisma.webhookEndpoint.update({
@@ -168,13 +149,11 @@ export const webhookEndpointRepository = (prisma: PrismaClient) => ({
           increment: 1,
         },
       },
-      include: {
-        clinic: true,
-      },
     }),
 
   /**
    * Reset failure count
+   * Nested relations are resolved by their respective DataLoaders
    */
   resetFailureCount: (id: string) =>
     prisma.webhookEndpoint.update({
@@ -182,20 +161,15 @@ export const webhookEndpointRepository = (prisma: PrismaClient) => ({
       data: {
         failureCount: 0,
       },
-      include: {
-        clinic: true,
-      },
     }),
 
   /**
    * Delete webhook endpoint by ID
+   * Nested relations are resolved by their respective DataLoaders
    */
   delete: (id: string) =>
     prisma.webhookEndpoint.delete({
       where: { id },
-      include: {
-        clinic: true,
-      },
     }),
 
   /**

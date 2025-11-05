@@ -138,8 +138,13 @@ export const weeklySlotService = (ctx: AuthenticatedContext) => {
         });
       }
 
-      // Check tenancy
-      if (slot.doctor.clinicId !== ctx.clinicId) {
+      // Check tenancy - load doctor to verify clinic
+      const doctor = await ctx.prisma.doctor.findUnique({
+        where: { id: slot.doctorId },
+        select: { clinicId: true },
+      });
+
+      if (!doctor || doctor.clinicId !== ctx.clinicId) {
         throw new GraphQLError('Forbidden: Weekly slot belongs to a different clinic', {
           extensions: { code: 'FORBIDDEN' },
         });
@@ -321,8 +326,13 @@ export const weeklySlotService = (ctx: AuthenticatedContext) => {
         });
       }
 
-      // Check tenancy
-      if (slot.doctor.clinicId !== ctx.clinicId) {
+      // Check tenancy - load doctor to verify clinic
+      const doctor = await ctx.prisma.doctor.findUnique({
+        where: { id: slot.doctorId },
+        select: { clinicId: true },
+      });
+
+      if (!doctor || doctor.clinicId !== ctx.clinicId) {
         throw new GraphQLError('Forbidden: Weekly slot belongs to a different clinic', {
           extensions: { code: 'FORBIDDEN' },
         });
@@ -392,8 +402,13 @@ export const weeklySlotService = (ctx: AuthenticatedContext) => {
         });
       }
 
-      // Check tenancy
-      if (slot.doctor.clinicId !== ctx.clinicId) {
+      // Check tenancy - load doctor to verify clinic
+      const doctor = await ctx.prisma.doctor.findUnique({
+        where: { id: slot.doctorId },
+        select: { clinicId: true },
+      });
+
+      if (!doctor || doctor.clinicId !== ctx.clinicId) {
         throw new GraphQLError('Forbidden: Weekly slot belongs to a different clinic', {
           extensions: { code: 'FORBIDDEN' },
         });
@@ -434,8 +449,13 @@ export const weeklySlotService = (ctx: AuthenticatedContext) => {
         });
       }
 
-      // Check tenancy
-      if (slot.doctor.clinicId !== ctx.clinicId) {
+      // Check tenancy - load doctor to verify clinic
+      const doctor = await ctx.prisma.doctor.findUnique({
+        where: { id: slot.doctorId },
+        select: { clinicId: true },
+      });
+
+      if (!doctor || doctor.clinicId !== ctx.clinicId) {
         throw new GraphQLError('Forbidden: Weekly slot belongs to a different clinic', {
           extensions: { code: 'FORBIDDEN' },
         });
@@ -477,8 +497,13 @@ export const weeklySlotService = (ctx: AuthenticatedContext) => {
         });
       }
 
-      // Check tenancy
-      if (slot.doctor.clinicId !== ctx.clinicId) {
+      // Check tenancy - load doctor to verify clinic
+      const doctor = await ctx.prisma.doctor.findUnique({
+        where: { id: slot.doctorId },
+        select: { clinicId: true },
+      });
+
+      if (!doctor || doctor.clinicId !== ctx.clinicId) {
         throw new GraphQLError('Forbidden: Weekly slot belongs to a different clinic', {
           extensions: { code: 'FORBIDDEN' },
         });

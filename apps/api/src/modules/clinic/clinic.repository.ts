@@ -55,22 +55,35 @@ export function createClinicRepository(prisma: PrismaClient) {
 
     /**
      * Find clinic by ID with relations
+     * Note: For performance, count operations should use separate queries
      */
     async findByIdWithRelations(id: string) {
-      return prisma.clinic.findUnique({
+      const clinic = await prisma.clinic.findUnique({
         where: { id },
-        include: {
-          _count: {
-            select: {
-              users: true,
-              doctors: true,
-              assistants: true,
-              patients: true,
-              appointments: true,
-            },
-          },
-        },
       });
+
+      if (!clinic) return null;
+
+      // Get counts separately - DataLoaders for nested relations are resolved by resolvers
+      const [userCount, doctorCount, assistantCount, patientCount, appointmentCount] =
+        await Promise.all([
+          prisma.user.count({ where: { clinicId: id } }),
+          prisma.doctor.count({ where: { clinicId: id } }),
+          prisma.assistant.count({ where: { clinicId: id } }),
+          prisma.patient.count({ where: { clinicId: id } }),
+          prisma.appointment.count({ where: { clinicId: id } }),
+        ]);
+
+      return {
+        ...clinic,
+        _count: {
+          users: userCount,
+          doctors: doctorCount,
+          assistants: assistantCount,
+          patients: patientCount,
+          appointments: appointmentCount,
+        },
+      };
     },
 
     /**

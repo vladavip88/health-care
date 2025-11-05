@@ -86,7 +86,24 @@ export const reminderService = (ctx: AuthenticatedContext) => {
       });
     }
 
-    if (reminder.appointment.doctor.clinicId !== ctx.clinicId) {
+    // Load appointment with doctor to verify clinic
+    const appointment = await ctx.prisma.appointment.findUnique({
+      where: { id: reminder.appointmentId },
+      select: { doctorId: true },
+    });
+
+    if (!appointment) {
+      throw new GraphQLError('Appointment not found', {
+        extensions: { code: 'NOT_FOUND' },
+      });
+    }
+
+    const doctor = await ctx.prisma.doctor.findUnique({
+      where: { id: appointment.doctorId },
+      select: { clinicId: true },
+    });
+
+    if (!doctor || doctor.clinicId !== ctx.clinicId) {
       throw new GraphQLError('Forbidden: Reminder belongs to a different clinic', {
         extensions: { code: 'FORBIDDEN' },
       });
@@ -101,9 +118,7 @@ export const reminderService = (ctx: AuthenticatedContext) => {
   const verifyAppointmentClinic = async (appointmentId: string) => {
     const appointment = await ctx.prisma.appointment.findUnique({
       where: { id: appointmentId },
-      include: {
-        doctor: true,
-      },
+      select: { doctorId: true },
     });
 
     if (!appointment) {
@@ -112,7 +127,12 @@ export const reminderService = (ctx: AuthenticatedContext) => {
       });
     }
 
-    if (appointment.doctor.clinicId !== ctx.clinicId) {
+    const doctor = await ctx.prisma.doctor.findUnique({
+      where: { id: appointment.doctorId },
+      select: { clinicId: true },
+    });
+
+    if (!doctor || doctor.clinicId !== ctx.clinicId) {
       throw new GraphQLError('Forbidden: Appointment belongs to a different clinic', {
         extensions: { code: 'FORBIDDEN' },
       });
@@ -335,7 +355,16 @@ export const reminderService = (ctx: AuthenticatedContext) => {
 
         // Filter to only this doctor's appointments
         const reminders = await repo.findReminders(ctx.clinicId, filter);
-        return reminders.filter((r) => r.appointment.doctorId === doctor.id);
+
+        // Load appointment doctor IDs for filtering
+        const reminderIds = reminders.map((r) => r.appointmentId);
+        const appointments = await ctx.prisma.appointment.findMany({
+          where: { id: { in: reminderIds } },
+          select: { id: true, doctorId: true },
+        });
+        const appointmentMap = new Map(appointments.map((a) => [a.id, a]));
+
+        return reminders.filter((r) => appointmentMap.get(r.appointmentId)?.doctorId === doctor.id);
       }
 
       return repo.findReminders(ctx.clinicId, filter);
@@ -353,7 +382,12 @@ export const reminderService = (ctx: AuthenticatedContext) => {
           where: { userId: ctx.user.id },
         });
 
-        if (!doctor || reminder.appointment.doctorId !== doctor.id) {
+        const appointment = await ctx.prisma.appointment.findUnique({
+          where: { id: reminder.appointmentId },
+          select: { doctorId: true },
+        });
+
+        if (!doctor || !appointment || appointment.doctorId !== doctor.id) {
           throw new GraphQLError('Forbidden: You can only view reminders for your own appointments', {
             extensions: { code: 'FORBIDDEN' },
           });
@@ -373,14 +407,14 @@ export const reminderService = (ctx: AuthenticatedContext) => {
       if (ctx.user.role === 'DOCTOR') {
         const appointment = await ctx.prisma.appointment.findUnique({
           where: { id: appointmentId },
-          include: { doctor: true },
+          select: { doctorId: true },
         });
 
         const doctor = await ctx.prisma.doctor.findUnique({
           where: { userId: ctx.user.id },
         });
 
-        if (!doctor || appointment?.doctorId !== doctor.id) {
+        if (!doctor || !appointment || appointment.doctorId !== doctor.id) {
           throw new GraphQLError('Forbidden: You can only view reminders for your own appointments', {
             extensions: { code: 'FORBIDDEN' },
           });
@@ -394,7 +428,20 @@ export const reminderService = (ctx: AuthenticatedContext) => {
      * Generate reminders for an appointment based on active rules
      */
     generateRemindersForAppointment: async (appointmentId: string) => {
-      const appointment = await verifyAppointmentClinic(appointmentId);
+      // Verify appointment exists and belongs to current clinic
+      await verifyAppointmentClinic(appointmentId);
+
+      // Load full appointment data
+      const appointment = await ctx.prisma.appointment.findUnique({
+        where: { id: appointmentId },
+        select: { start: true, doctorId: true },
+      });
+
+      if (!appointment) {
+        throw new GraphQLError('Appointment not found', {
+          extensions: { code: 'NOT_FOUND' },
+        });
+      }
 
       // Only generate reminders for future appointments
       if (appointment.start <= new Date()) {

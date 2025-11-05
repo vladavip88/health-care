@@ -3,38 +3,26 @@ import { PrismaClient, Prisma } from '@prisma/client';
 export const weeklySlotRepository = (prisma: PrismaClient) => ({
   /**
    * Find weekly slot by ID
+   * Nested relations (doctor) are resolved by their respective DataLoaders
    */
   findById: (id: string) =>
     prisma.weeklySlot.findUnique({
       where: { id },
-      include: {
-        doctor: {
-          include: {
-            user: true,
-            clinic: true,
-          },
-        },
-      },
     }),
 
   /**
    * Find all weekly slots for a doctor
+   * Nested relations (doctor) are resolved by their respective DataLoaders
    */
   findByDoctor: (doctorId: string) =>
     prisma.weeklySlot.findMany({
       where: { doctorId },
-      include: {
-        doctor: {
-          include: {
-            user: true,
-          },
-        },
-      },
       orderBy: [{ weekday: 'asc' }, { startTime: 'asc' }],
     }),
 
   /**
    * Find active weekly slots for a doctor
+   * Nested relations (doctor) are resolved by their respective DataLoaders
    */
   findActiveByDoctor: (doctorId: string) =>
     prisma.weeklySlot.findMany({
@@ -42,31 +30,18 @@ export const weeklySlotRepository = (prisma: PrismaClient) => ({
         doctorId,
         active: true,
       },
-      include: {
-        doctor: {
-          include: {
-            user: true,
-          },
-        },
-      },
       orderBy: [{ weekday: 'asc' }, { startTime: 'asc' }],
     }),
 
   /**
    * Find weekly slots by weekday
+   * Nested relations (doctor) are resolved by their respective DataLoaders
    */
   findByWeekday: (doctorId: string, weekday: number) =>
     prisma.weeklySlot.findMany({
       where: {
         doctorId,
         weekday,
-      },
-      include: {
-        doctor: {
-          include: {
-            user: true,
-          },
-        },
       },
       orderBy: { startTime: 'asc' },
     }),
@@ -101,18 +76,11 @@ export const weeklySlotRepository = (prisma: PrismaClient) => ({
 
   /**
    * Create a new weekly slot
+   * Nested relations (doctor) are resolved by their respective DataLoaders
    */
   create: (data: Prisma.WeeklySlotCreateInput) =>
     prisma.weeklySlot.create({
       data,
-      include: {
-        doctor: {
-          include: {
-            user: true,
-            clinic: true,
-          },
-        },
-      },
     }),
 
   /**
@@ -126,69 +94,41 @@ export const weeklySlotRepository = (prisma: PrismaClient) => ({
 
   /**
    * Update weekly slot by ID
+   * Nested relations (doctor) are resolved by their respective DataLoaders
    */
   update: (id: string, data: Prisma.WeeklySlotUpdateInput) =>
     prisma.weeklySlot.update({
       where: { id },
       data,
-      include: {
-        doctor: {
-          include: {
-            user: true,
-            clinic: true,
-          },
-        },
-      },
     }),
 
   /**
    * Activate weekly slot
+   * Nested relations (doctor) are resolved by their respective DataLoaders
    */
   activate: (id: string) =>
     prisma.weeklySlot.update({
       where: { id },
       data: { active: true },
-      include: {
-        doctor: {
-          include: {
-            user: true,
-            clinic: true,
-          },
-        },
-      },
     }),
 
   /**
    * Deactivate weekly slot
+   * Nested relations (doctor) are resolved by their respective DataLoaders
    */
   deactivate: (id: string) =>
     prisma.weeklySlot.update({
       where: { id },
       data: { active: false },
-      include: {
-        doctor: {
-          include: {
-            user: true,
-            clinic: true,
-          },
-        },
-      },
     }),
 
   /**
    * Delete weekly slot by ID
+   * Nested relations (doctor) are resolved by their respective DataLoaders
    */
   delete: (id: string) =>
     prisma.weeklySlot.delete({
       where: { id },
-      include: {
-        doctor: {
-          include: {
-            user: true,
-            clinic: true,
-          },
-        },
-      },
     }),
 
   /**

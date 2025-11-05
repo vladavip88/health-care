@@ -3,24 +3,16 @@ import { PrismaClient, Prisma } from '@prisma/client';
 export const auditLogRepository = (prisma: PrismaClient) => ({
   /**
    * Find audit log by ID
+   * Nested relations are resolved by their respective DataLoaders
    */
   findById: (id: string) =>
     prisma.auditLog.findUnique({
       where: { id },
-      include: {
-        clinic: true,
-        actor: true,
-        appointment: {
-          include: {
-            doctor: true,
-            patient: true,
-          },
-        },
-      },
     }),
 
   /**
    * Find audit logs with filters
+   * Nested relations are resolved by their respective DataLoaders
    */
   findWithFilters: (
     clinicId: string,
@@ -74,11 +66,6 @@ export const auditLogRepository = (prisma: PrismaClient) => ({
 
     return prisma.auditLog.findMany({
       where,
-      include: {
-        clinic: true,
-        actor: true,
-        appointment: true,
-      },
       orderBy: { createdAt: 'desc' },
       take: options?.limit,
       skip: options?.offset,
@@ -87,6 +74,7 @@ export const auditLogRepository = (prisma: PrismaClient) => ({
 
   /**
    * Find audit logs by entity
+   * Nested relations are resolved by their respective DataLoaders
    */
   findByEntity: (clinicId: string, entity: string, entityId: string) =>
     prisma.auditLog.findMany({
@@ -95,27 +83,18 @@ export const auditLogRepository = (prisma: PrismaClient) => ({
         entity,
         entityId,
       },
-      include: {
-        clinic: true,
-        actor: true,
-        appointment: true,
-      },
       orderBy: { createdAt: 'desc' },
     }),
 
   /**
    * Find audit logs by actor
+   * Nested relations are resolved by their respective DataLoaders
    */
   findByActor: (clinicId: string, actorId: string, options?: { limit?: number; offset?: number }) =>
     prisma.auditLog.findMany({
       where: {
         clinicId,
         actorId,
-      },
-      include: {
-        clinic: true,
-        actor: true,
-        appointment: true,
       },
       orderBy: { createdAt: 'desc' },
       take: options?.limit,
@@ -124,33 +103,25 @@ export const auditLogRepository = (prisma: PrismaClient) => ({
 
   /**
    * Find audit logs by appointment
+   * Nested relations are resolved by their respective DataLoaders
    */
   findByAppointment: (appointmentId: string) =>
     prisma.auditLog.findMany({
       where: {
         appointmentId,
       },
-      include: {
-        clinic: true,
-        actor: true,
-        appointment: true,
-      },
       orderBy: { createdAt: 'desc' },
     }),
 
   /**
    * Find audit logs by action
+   * Nested relations are resolved by their respective DataLoaders
    */
   findByAction: (clinicId: string, action: string, options?: { limit?: number; offset?: number }) =>
     prisma.auditLog.findMany({
       where: {
         clinicId,
         action,
-      },
-      include: {
-        clinic: true,
-        actor: true,
-        appointment: true,
       },
       orderBy: { createdAt: 'desc' },
       take: options?.limit,
@@ -159,30 +130,22 @@ export const auditLogRepository = (prisma: PrismaClient) => ({
 
   /**
    * Find recent audit logs
+   * Nested relations are resolved by their respective DataLoaders
    */
   findRecent: (clinicId: string, limit: number = 100) =>
     prisma.auditLog.findMany({
       where: { clinicId },
-      include: {
-        clinic: true,
-        actor: true,
-        appointment: true,
-      },
       orderBy: { createdAt: 'desc' },
       take: limit,
     }),
 
   /**
    * Create a new audit log
+   * Nested relations are resolved by their respective DataLoaders
    */
   create: (data: Prisma.AuditLogCreateInput) =>
     prisma.auditLog.create({
       data,
-      include: {
-        clinic: true,
-        actor: true,
-        appointment: true,
-      },
     }),
 
   /**
@@ -195,15 +158,11 @@ export const auditLogRepository = (prisma: PrismaClient) => ({
 
   /**
    * Delete audit log by ID
+   * Nested relations are resolved by their respective DataLoaders
    */
   delete: (id: string) =>
     prisma.auditLog.delete({
       where: { id },
-      include: {
-        clinic: true,
-        actor: true,
-        appointment: true,
-      },
     }),
 
   /**

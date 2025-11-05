@@ -3,37 +3,29 @@ import { PrismaClient, Prisma } from '@prisma/client';
 export const assistantRepository = (prisma: PrismaClient) => ({
   /**
    * Find assistant by ID
+   * Nested relations (user, clinic) are resolved by their respective DataLoaders
    */
   findById: (id: string) =>
     prisma.assistant.findUnique({
       where: { id },
-      include: {
-        user: true,
-        clinic: true,
-      },
     }),
 
   /**
    * Find assistant by user ID
+   * Nested relations (user, clinic) are resolved by their respective DataLoaders
    */
   findByUserId: (userId: string) =>
     prisma.assistant.findUnique({
       where: { userId },
-      include: {
-        user: true,
-        clinic: true,
-      },
     }),
 
   /**
    * Find all assistants in a clinic
+   * Nested relations (user) are resolved by their respective DataLoaders
    */
   findManyByClinic: (clinicId: string) =>
     prisma.assistant.findMany({
       where: { clinicId },
-      include: {
-        user: true,
-      },
       orderBy: {
         createdAt: 'desc',
       },
@@ -41,15 +33,13 @@ export const assistantRepository = (prisma: PrismaClient) => ({
 
   /**
    * Find active assistants in a clinic
+   * Nested relations (user) are resolved by their respective DataLoaders
    */
   findActiveByClinic: (clinicId: string) =>
     prisma.assistant.findMany({
       where: {
         clinicId,
         active: true,
-      },
-      include: {
-        user: true,
       },
       orderBy: {
         createdAt: 'desc',
@@ -58,6 +48,7 @@ export const assistantRepository = (prisma: PrismaClient) => ({
 
   /**
    * Find assistants by permission
+   * Nested relations (user) are resolved by their respective DataLoaders
    */
   findByPermission: (clinicId: string, permission: string) =>
     prisma.assistant.findMany({
@@ -68,72 +59,54 @@ export const assistantRepository = (prisma: PrismaClient) => ({
         },
         active: true,
       },
-      include: {
-        user: true,
-      },
     }),
 
   /**
    * Create a new assistant
+   * Nested relations (user, clinic) are resolved by their respective DataLoaders
    */
   create: (data: Prisma.AssistantCreateInput) =>
     prisma.assistant.create({
       data,
-      include: {
-        user: true,
-        clinic: true,
-      },
     }),
 
   /**
    * Update assistant by ID
+   * Nested relations (user, clinic) are resolved by their respective DataLoaders
    */
   update: (id: string, data: Prisma.AssistantUpdateInput) =>
     prisma.assistant.update({
       where: { id },
       data,
-      include: {
-        user: true,
-        clinic: true,
-      },
     }),
 
   /**
    * Delete assistant by ID
+   * Nested relations (user, clinic) are resolved by their respective DataLoaders
    */
   delete: (id: string) =>
     prisma.assistant.delete({
       where: { id },
-      include: {
-        user: true,
-        clinic: true,
-      },
     }),
 
   /**
    * Deactivate assistant
+   * Nested relations (user, clinic) are resolved by their respective DataLoaders
    */
   deactivate: (id: string) =>
     prisma.assistant.update({
       where: { id },
       data: { active: false },
-      include: {
-        user: true,
-        clinic: true,
-      },
     }),
 
   /**
    * Activate assistant
+   * Nested relations (user, clinic) are resolved by their respective DataLoaders
    */
   activate: (id: string) =>
     prisma.assistant.update({
       where: { id },
       data: { active: true },
-      include: {
-        user: true,
-        clinic: true,
-      },
     }),
 
   /**

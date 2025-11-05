@@ -3,56 +3,29 @@ import { PrismaClient, Prisma } from '@prisma/client';
 export const patientRepository = (prisma: PrismaClient) => ({
   /**
    * Find patient by ID
+   * Nested relations (user, clinic, appointments) are resolved by their respective DataLoaders
    */
   findById: (id: string) =>
     prisma.patient.findUnique({
       where: { id },
-      include: {
-        user: true,
-        clinic: true,
-        appointments: {
-          orderBy: { start: 'desc' },
-          take: 10,
-          include: {
-            doctor: {
-              include: {
-                user: true,
-              },
-            },
-          },
-        },
-      },
     }),
 
   /**
    * Find patient by user ID
+   * Nested relations (user, clinic, appointments) are resolved by their respective DataLoaders
    */
   findByUserId: (userId: string) =>
     prisma.patient.findUnique({
       where: { userId },
-      include: {
-        user: true,
-        clinic: true,
-        appointments: {
-          orderBy: { start: 'desc' },
-          take: 10,
-        },
-      },
     }),
 
   /**
    * Find all patients in a clinic
+   * Nested relations (user, appointments) are resolved by their respective DataLoaders
    */
   findManyByClinic: (clinicId: string) =>
     prisma.patient.findMany({
       where: { clinicId },
-      include: {
-        user: true,
-        appointments: {
-          orderBy: { start: 'desc' },
-          take: 1,
-        },
-      },
       orderBy: {
         lastName: 'asc',
       },
@@ -60,6 +33,7 @@ export const patientRepository = (prisma: PrismaClient) => ({
 
   /**
    * Search patients in a clinic
+   * Nested relations (user, appointments) are resolved by their respective DataLoaders
    */
   search: (clinicId: string, searchTerm: string) =>
     prisma.patient.findMany({
@@ -92,13 +66,6 @@ export const patientRepository = (prisma: PrismaClient) => ({
           },
         ],
       },
-      include: {
-        user: true,
-        appointments: {
-          orderBy: { start: 'desc' },
-          take: 1,
-        },
-      },
       orderBy: {
         lastName: 'asc',
       },
@@ -106,6 +73,7 @@ export const patientRepository = (prisma: PrismaClient) => ({
 
   /**
    * Find patient by email in clinic
+   * Nested relations (user, clinic) are resolved by their respective DataLoaders
    */
   findByEmail: (clinicId: string, email: string) =>
     prisma.patient.findFirst({
@@ -113,14 +81,11 @@ export const patientRepository = (prisma: PrismaClient) => ({
         clinicId,
         email,
       },
-      include: {
-        user: true,
-        clinic: true,
-      },
     }),
 
   /**
    * Find patient by phone in clinic
+   * Nested relations (user) are resolved by their respective DataLoaders
    */
   findByPhone: (clinicId: string, phone: string) =>
     prisma.patient.findMany({
@@ -130,46 +95,34 @@ export const patientRepository = (prisma: PrismaClient) => ({
           contains: phone,
         },
       },
-      include: {
-        user: true,
-      },
     }),
 
   /**
    * Create a new patient
+   * Nested relations (user, clinic) are resolved by their respective DataLoaders
    */
   create: (data: Prisma.PatientCreateInput) =>
     prisma.patient.create({
       data,
-      include: {
-        user: true,
-        clinic: true,
-      },
     }),
 
   /**
    * Update patient by ID
+   * Nested relations (user, clinic) are resolved by their respective DataLoaders
    */
   update: (id: string, data: Prisma.PatientUpdateInput) =>
     prisma.patient.update({
       where: { id },
       data,
-      include: {
-        user: true,
-        clinic: true,
-      },
     }),
 
   /**
    * Delete patient by ID
+   * Nested relations (user, clinic) are resolved by their respective DataLoaders
    */
   delete: (id: string) =>
     prisma.patient.delete({
       where: { id },
-      include: {
-        user: true,
-        clinic: true,
-      },
     }),
 
   /**
@@ -193,6 +146,7 @@ export const patientRepository = (prisma: PrismaClient) => ({
 
   /**
    * Get patients by doctor (patients who had appointments with this doctor)
+   * Nested relations (user, appointments) are resolved by their respective DataLoaders
    */
   findByDoctor: (doctorId: string, clinicId: string) =>
     prisma.patient.findMany({
@@ -202,14 +156,6 @@ export const patientRepository = (prisma: PrismaClient) => ({
           some: {
             doctorId,
           },
-        },
-      },
-      include: {
-        user: true,
-        appointments: {
-          where: { doctorId },
-          orderBy: { start: 'desc' },
-          take: 1,
         },
       },
       orderBy: {
