@@ -11,6 +11,12 @@
     },
     {
       "path": "./apps/api"
+    },
+    {
+      "path": "./apps/landing-e2e"
+    },
+    {
+      "path": "./apps/landing"
     }
   ]
 }

@@ -48,3 +48,7 @@ vitest.config.*.timestamp*
 test-output
 
 .history
+
+# Next.js
+.next
+out
