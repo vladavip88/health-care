@@ -139,7 +139,22 @@ export function createUserService(repository: UserRepository) {
         clinicId: input.clinicId,
       };
 
-      return repository.create(userData);
+      const user = await repository.create(userData);
+
+      // Audit log
+      await context.audit?.log({
+        clinicId: context.clinicId,
+        actorId: context.user.id,
+        action: 'user.create',
+        entity: 'User',
+        entityId: user.id,
+        metadata: {
+          email: user.email,
+          role: user.role,
+        },
+      });
+
+      return user;
     },
 
     /**
@@ -191,7 +206,22 @@ export function createUserService(repository: UserRepository) {
         active: input.active,
       };
 
-      return repository.update(input.id, updateData);
+      const updatedUser = await repository.update(input.id, updateData);
+
+      // Audit log
+      await context.audit?.log({
+        clinicId: context.clinicId,
+        actorId: context.user.id,
+        action: 'user.update',
+        entity: 'User',
+        entityId: input.id,
+        metadata: {
+          email: existingUser.email,
+          changes: updateData,
+        },
+      });
+
+      return updatedUser;
     },
 
     /**
@@ -234,7 +264,22 @@ export function createUserService(repository: UserRepository) {
 
       // Consider soft delete instead (set active: false)
       // return repository.update(id, { active: false });
-      return repository.delete(id);
+      const deletedUser = await repository.delete(id);
+
+      // Audit log
+      await context.audit?.log({
+        clinicId: context.clinicId,
+        actorId: context.user.id,
+        action: 'user.delete',
+        entity: 'User',
+        entityId: id,
+        metadata: {
+          email: existingUser.email,
+          role: existingUser.role,
+        },
+      });
+
+      return deletedUser;
     },
 
     /**

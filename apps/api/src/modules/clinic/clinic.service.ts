@@ -187,7 +187,22 @@ export function createClinicService(repository: ClinicRepository) {
       }
 
       const { id, ...updateData } = input;
-      return repository.update(id, updateData);
+      const updatedClinic = await repository.update(id, updateData);
+
+      // Audit log
+      await context.audit?.log({
+        clinicId: context.clinicId,
+        actorId: context.user.id,
+        action: 'clinic.update',
+        entity: 'Clinic',
+        entityId: id,
+        metadata: {
+          name: existingClinic.name,
+          changes: updateData,
+        },
+      });
+
+      return updatedClinic;
     },
 
     /**
@@ -221,7 +236,24 @@ export function createClinicService(repository: ClinicRepository) {
         });
       }
 
-      return repository.updateSubscription(input.id, input.plan, input.status, input.until);
+      const updatedClinic = await repository.updateSubscription(input.id, input.plan, input.status, input.until);
+
+      // Audit log
+      await context.audit?.log({
+        clinicId: context.clinicId,
+        actorId: context.user.id,
+        action: 'clinic.updateSubscription',
+        entity: 'Clinic',
+        entityId: input.id,
+        metadata: {
+          name: existingClinic.name,
+          newPlan: input.plan,
+          newStatus: input.status,
+          newUntil: input.until,
+        },
+      });
+
+      return updatedClinic;
     },
 
     /**

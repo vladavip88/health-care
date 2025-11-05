@@ -12,32 +12,32 @@ export function createAuthMutations(service: AuthService) {
      * Register a new user
      * Public mutation - no authentication required
      */
-    register: async (_parent: unknown, args: { input: RegisterInput }) => {
-      return service.register(args.input);
+    register: async (_parent: unknown, args: { input: RegisterInput }, context: Context) => {
+      return service.register(args.input, context);
     },
 
     /**
      * Login user
      * Public mutation - no authentication required
      */
-    login: async (_parent: unknown, args: { input: LoginInput }) => {
-      return service.login(args.input);
+    login: async (_parent: unknown, args: { input: LoginInput }, context: Context) => {
+      return service.login(args.input, context);
     },
 
     /**
      * Refresh access token using refresh token
      * Public mutation - no authentication required
      */
-    refreshToken: async (_parent: unknown, args: { refreshToken: string }) => {
-      return service.refreshToken(args.refreshToken);
+    refreshToken: async (_parent: unknown, args: { refreshToken: string }, context: Context) => {
+      return service.refreshToken(args.refreshToken, context);
     },
 
     /**
      * Logout user (invalidate refresh token)
      * Public mutation - can be called with or without authentication
      */
-    logout: async (_parent: unknown, args: { refreshToken: string }) => {
-      return service.logout(args.refreshToken);
+    logout: async (_parent: unknown, args: { refreshToken: string }, context: Context) => {
+      return service.logout(args.refreshToken, context);
     },
 
     /**
@@ -48,7 +48,7 @@ export function createAuthMutations(service: AuthService) {
       if (!context.user) {
         return false;
       }
-      return service.logoutAll(context.user.id);
+      return service.logoutAll(context.user.id, context);
     },
   };
 }

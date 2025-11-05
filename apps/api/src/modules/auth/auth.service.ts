@@ -11,6 +11,7 @@ import type {
   RefreshTokenData,
   TokenConfig,
 } from './auth.types';
+import type { Context } from '../../common/types/context';
 import { getPermissionsForRole } from '../../common/auth/permissions';
 
 /**
@@ -141,7 +142,7 @@ export function createAuthService(repository: AuthRepository) {
     /**
      * Register a new user
      */
-    async register(input: RegisterInput): Promise<AuthResponse> {
+    async register(input: RegisterInput, ctx?: Context): Promise<AuthResponse> {
       // Validate input
       if (!input.email || !input.password) {
         throw new GraphQLError('Email and password are required', {
@@ -180,6 +181,19 @@ export function createAuthService(repository: AuthRepository) {
       // Generate tokens
       const tokens = await this.generateTokenPair(user.id, user.email, user.role, user.clinicId);
 
+      // Audit log
+      await ctx?.audit?.log({
+        clinicId: input.clinicId,
+        actorId: user.id,
+        action: 'auth.register',
+        entity: 'User',
+        entityId: user.id,
+        metadata: {
+          email: user.email,
+          role: user.role,
+        },
+      });
+
       return {
         user: {
           id: user.id,
@@ -196,7 +210,7 @@ export function createAuthService(repository: AuthRepository) {
     /**
      * Login user
      */
-    async login(input: LoginInput): Promise<AuthResponse> {
+    async login(input: LoginInput, ctx?: Context): Promise<AuthResponse> {
       // Validate input
       if (!input.email || !input.password) {
         throw new GraphQLError('Email and password are required', {
@@ -230,6 +244,18 @@ export function createAuthService(repository: AuthRepository) {
       // Generate tokens
       const tokens = await this.generateTokenPair(user.id, user.email, user.role, user.clinicId);
 
+      // Audit log
+      await ctx?.audit?.log({
+        clinicId: user.clinicId,
+        actorId: user.id,
+        action: 'auth.login',
+        entity: 'User',
+        entityId: user.id,
+        metadata: {
+          email: user.email,
+        },
+      });
+
       return {
         user: {
           id: user.id,
@@ -246,7 +272,7 @@ export function createAuthService(repository: AuthRepository) {
     /**
      * Refresh access token using refresh token
      */
-    async refreshToken(refreshToken: string): Promise<AuthTokens> {
+    async refreshToken(refreshToken: string, ctx?: Context): Promise<AuthTokens> {
       // Verify refresh token
       const payload = this.verifyRefreshToken(refreshToken);
       if (!payload) {
@@ -281,6 +307,18 @@ export function createAuthService(repository: AuthRepository) {
       // Delete old refresh token
       await repository.deleteRefreshToken(refreshToken);
 
+      // Audit log
+      await ctx?.audit?.log({
+        clinicId: user.clinicId,
+        actorId: user.id,
+        action: 'auth.refreshToken',
+        entity: 'User',
+        entityId: user.id,
+        metadata: {
+          email: user.email,
+        },
+      });
+
       // Generate new token pair
       return this.generateTokenPair(user.id, user.email, user.role, user.clinicId);
     },
@@ -288,9 +326,27 @@ export function createAuthService(repository: AuthRepository) {
     /**
      * Logout user (invalidate refresh token)
      */
-    async logout(refreshToken: string): Promise<boolean> {
+    async logout(refreshToken: string, ctx?: Context): Promise<boolean> {
       try {
         await repository.deleteRefreshToken(refreshToken);
+
+        // Audit log (only if user is authenticated)
+        if (ctx?.user && ctx.clinicId) {
+          const user = await repository.findUserById(ctx.user.id);
+          if (user) {
+            await ctx.audit?.log({
+              clinicId: ctx.clinicId,
+              actorId: ctx.user.id,
+              action: 'auth.logout',
+              entity: 'User',
+              entityId: ctx.user.id,
+              metadata: {
+                email: user.email,
+              },
+            });
+          }
+        }
+
         return true;
       } catch {
         return false;
@@ -300,9 +356,25 @@ export function createAuthService(repository: AuthRepository) {
     /**
      * Logout from all devices (invalidate all refresh tokens)
      */
-    async logoutAll(userId: string): Promise<boolean> {
+    async logoutAll(userId: string, ctx?: Context): Promise<boolean> {
       try {
         await repository.deleteAllUserRefreshTokens(userId);
+
+        // Audit log
+        const user = await repository.findUserById(userId);
+        if (user) {
+          await ctx?.audit?.log({
+            clinicId: user.clinicId,
+            actorId: user.id,
+            action: 'auth.logoutAll',
+            entity: 'User',
+            entityId: user.id,
+            metadata: {
+              email: user.email,
+            },
+          });
+        }
+
         return true;
       } catch {
         return false;
