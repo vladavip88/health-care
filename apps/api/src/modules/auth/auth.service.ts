@@ -6,6 +6,7 @@ import type {
   RegisterInput,
   LoginInput,
   AuthResponse,
+  LoginResponse,
   JWTPayload,
   AuthTokens,
   RefreshTokenData,
@@ -140,6 +141,137 @@ export function createAuthService(repository: AuthRepository) {
     },
 
     /**
+     * Login - returns user and list of available clinics
+     */
+    async login(input: LoginInput, ctx?: Context): Promise<LoginResponse> {
+      // Validate input
+      if (!input.email || !input.password) {
+        throw new GraphQLError('Email and password are required', {
+          extensions: { code: 'BAD_USER_INPUT' },
+        });
+      }
+
+      // Find all users with this email
+      const users = await repository.findAllUsersByEmail(input.email);
+
+      if (users.length === 0) {
+        throw new GraphQLError('Invalid credentials', {
+          extensions: { code: 'UNAUTHENTICATED' },
+        });
+      }
+
+      // Verify password against first user (all have same password for same email)
+      const firstUser = users[0];
+      const isPasswordValid = await this.comparePassword(input.password, firstUser.passwordHash);
+      if (!isPasswordValid) {
+        throw new GraphQLError('Invalid credentials', {
+          extensions: { code: 'UNAUTHENTICATED' },
+        });
+      }
+
+      // Check if at least one user is active
+      const activeUser = users.find((u) => u.active);
+      if (!activeUser) {
+        throw new GraphQLError('Account is deactivated', {
+          extensions: { code: 'FORBIDDEN' },
+        });
+      }
+
+      // Audit log
+      await ctx?.audit?.log({
+        clinicId: firstUser.clinicId,
+        actorId: firstUser.id,
+        action: 'auth.login_request',
+        entity: 'User',
+        entityId: firstUser.id,
+        metadata: {
+          email: firstUser.email,
+          clinicsCount: users.length,
+        },
+      });
+
+      // Return user and clinics list
+      return {
+        user: {
+          id: firstUser.id,
+          email: firstUser.email,
+          firstName: firstUser.firstName,
+          lastName: firstUser.lastName,
+          role: firstUser.role,
+          clinicId: firstUser.clinicId,
+        },
+        clinics: users.map((u) => ({
+          id: u.clinicId,
+          name: u.clinic?.name || 'Unknown Clinic',
+        })),
+      };
+    },
+
+    /**
+     * Select clinic and finalize login - generates tokens
+     */
+    async selectClinic(email: string, password: string, clinicId: string, ctx?: Context): Promise<AuthResponse> {
+      // Validate input
+      if (!email || !password || !clinicId) {
+        throw new GraphQLError('Email, password, and clinicId are required', {
+          extensions: { code: 'BAD_USER_INPUT' },
+        });
+      }
+
+      // Find user by email and clinicId
+      const users = await repository.findAllUsersByEmail(email);
+      const user = users.find((u) => u.clinicId === clinicId);
+
+      if (!user) {
+        throw new GraphQLError('Invalid credentials or clinic', {
+          extensions: { code: 'UNAUTHENTICATED' },
+        });
+      }
+
+      // Check if user is active
+      if (!user.active) {
+        throw new GraphQLError('Account is deactivated', {
+          extensions: { code: 'FORBIDDEN' },
+        });
+      }
+
+      // Verify password
+      const isPasswordValid = await this.comparePassword(password, user.passwordHash);
+      if (!isPasswordValid) {
+        throw new GraphQLError('Invalid credentials', {
+          extensions: { code: 'UNAUTHENTICATED' },
+        });
+      }
+
+      // Generate tokens
+      const tokens = await this.generateTokenPair(user.id, user.email, user.role, user.clinicId);
+
+      // Audit log
+      await ctx?.audit?.log({
+        clinicId: user.clinicId,
+        actorId: user.id,
+        action: 'auth.login',
+        entity: 'User',
+        entityId: user.id,
+        metadata: {
+          email: user.email,
+        },
+      });
+
+      return {
+        user: {
+          id: user.id,
+          email: user.email,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          role: user.role,
+          clinicId: user.clinicId,
+        },
+        tokens,
+      };
+    },
+
+    /**
      * Register a new user
      */
     async register(input: RegisterInput, ctx?: Context): Promise<AuthResponse> {
@@ -156,10 +288,10 @@ export function createAuthService(repository: AuthRepository) {
         });
       }
 
-      // Check if email already exists
-      const existingUser = await repository.findUserByEmail(input.email);
-      if (existingUser) {
-        throw new GraphQLError('Email already in use', {
+      // Check if email already exists in this clinic
+      const emailExistsInClinic = await repository.emailExistsInClinic(input.email, input.clinicId);
+      if (emailExistsInClinic) {
+        throw new GraphQLError('Email already in use in this clinic', {
           extensions: { code: 'BAD_USER_INPUT' },
         });
       }
@@ -191,68 +323,6 @@ export function createAuthService(repository: AuthRepository) {
         metadata: {
           email: user.email,
           role: user.role,
-        },
-      });
-
-      return {
-        user: {
-          id: user.id,
-          email: user.email,
-          firstName: user.firstName,
-          lastName: user.lastName,
-          role: user.role,
-          clinicId: user.clinicId,
-        },
-        tokens,
-      };
-    },
-
-    /**
-     * Login user
-     */
-    async login(input: LoginInput, ctx?: Context): Promise<AuthResponse> {
-      // Validate input
-      if (!input.email || !input.password) {
-        throw new GraphQLError('Email and password are required', {
-          extensions: { code: 'BAD_USER_INPUT' },
-        });
-      }
-
-      // Find user by email
-      const user = await repository.findUserByEmail(input.email);
-      if (!user) {
-        throw new GraphQLError('Invalid credentials', {
-          extensions: { code: 'UNAUTHENTICATED' },
-        });
-      }
-
-      // Check if user is active
-      if (!user.active) {
-        throw new GraphQLError('Account is deactivated', {
-          extensions: { code: 'FORBIDDEN' },
-        });
-      }
-
-      // Verify password
-      const isPasswordValid = await this.comparePassword(input.password, user.passwordHash);
-      if (!isPasswordValid) {
-        throw new GraphQLError('Invalid credentials', {
-          extensions: { code: 'UNAUTHENTICATED' },
-        });
-      }
-
-      // Generate tokens
-      const tokens = await this.generateTokenPair(user.id, user.email, user.role, user.clinicId);
-
-      // Audit log
-      await ctx?.audit?.log({
-        clinicId: user.clinicId,
-        actorId: user.id,
-        action: 'auth.login',
-        entity: 'User',
-        entityId: user.id,
-        metadata: {
-          email: user.email,
         },
       });
 

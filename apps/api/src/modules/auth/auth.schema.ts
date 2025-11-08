@@ -26,6 +26,22 @@ export const authSchema = gql`
   }
 
   """
+  Clinic information returned in login response
+  """
+  type LoginClinicInfo {
+    id: ID!
+    name: String!
+  }
+
+  """
+  Login response with user and list of available clinics
+  """
+  type LoginResponse {
+    user: AuthUser!
+    clinics: [LoginClinicInfo!]!
+  }
+
+  """
   Authentication response with user and tokens
   """
   type AuthResponse {
@@ -65,9 +81,16 @@ export const authSchema = gql`
     """
     Login with email and password
     Public mutation - no authentication required
+    Returns user and list of clinics where user has account
+    """
+    login(input: LoginInput!): LoginResponse!
+
+    """
+    Select clinic and finalize login
+    Public mutation - no authentication required
     Returns access token (short-lived) and refresh token (long-lived)
     """
-    login(input: LoginInput!): AuthResponse!
+    selectClinic(email: String!, password: String!, clinicId: String!): AuthResponse!
 
     """
     Refresh access token using refresh token

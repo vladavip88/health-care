@@ -5,11 +5,19 @@
   "scripts": {},
   "private": true,
   "dependencies": {
+    "@apollo/client": "^4.0.9",
     "@apollo/server": "^5.1.0",
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.1",
     "@graphql-tools/merge": "^9.1.2",
     "@graphql-tools/schema": "^10.0.26",
     "@graphql-tools/utils": "^10.10.0",
+    "@hookform/resolvers": "^5.2.2",
+    "@mantine/core": "^8.3.6",
+    "@mantine/hooks": "^8.3.6",
+    "@mantine/notifications": "^8.3.6",
     "@prisma/client": "^6.18.0",
+    "@tabler/icons-react": "^3.35.0",
     "bcrypt": "^6.0.0",
     "body-parser": "^2.2.0",
     "cors": "^2.8.5",
@@ -23,7 +31,9 @@
     "next": "~15.2.4",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "react-router-dom": "6.29.0"
+    "react-hook-form": "^7.66.0",
+    "react-router-dom": "6.29.0",
+    "yup": "^1.7.1"
   },
   "devDependencies": {
     "@eslint/compat": "^1.1.1",

@@ -33,6 +33,13 @@ export const userSchema = gql`
 
   extend type Query {
     """
+    Get the currently authenticated user
+    Requires authentication only
+    """
+    currentUser: User
+      @auth
+
+    """
     Get a single user by ID
     Requires authentication and appropriate permissions
     """

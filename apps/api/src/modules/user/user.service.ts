@@ -29,6 +29,28 @@ export interface UpdateUserInput {
 export function createUserService(repository: UserRepository) {
   return {
     /**
+     * Get the currently authenticated user
+     * Returns the user from context without additional permission checks
+     */
+    async getCurrentUser(context: AuthenticatedContext): Promise<User | null> {
+      if (!context.user) {
+        throw new GraphQLError('Unauthorized: User not authenticated', {
+          extensions: { code: 'UNAUTHENTICATED' },
+        });
+      }
+
+      const user = await repository.findById(context.user.id);
+
+      if (!user) {
+        throw new GraphQLError('User not found', {
+          extensions: { code: 'NOT_FOUND' },
+        });
+      }
+
+      return user;
+    },
+
+    /**
      * Get user by ID
      * Validates tenancy and permissions
      */

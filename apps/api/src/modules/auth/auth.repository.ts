@@ -19,11 +19,29 @@ export interface CreateUserData {
 export function createAuthRepository(prisma: PrismaClient, redis: Redis) {
   return {
     /**
-     * Find user by email
+     * Find user by email (returns first user, for backward compatibility)
      */
     async findUserByEmail(email: string): Promise<User | null> {
-      return prisma.user.findUnique({
+      return prisma.user.findFirst({
         where: { email },
+      });
+    },
+
+    /**
+     * Find all users with the same email
+     * Supports multi-clinic logins
+     */
+    async findAllUsersByEmail(email: string) {
+      return prisma.user.findMany({
+        where: { email },
+        include: {
+          clinic: {
+            select: {
+              id: true,
+              name: true,
+            },
+          },
+        },
       });
     },
 
@@ -108,11 +126,21 @@ export function createAuthRepository(prisma: PrismaClient, redis: Redis) {
     },
 
     /**
-     * Check if email already exists
+     * Check if email already exists (globally)
      */
     async emailExists(email: string): Promise<boolean> {
       const count = await prisma.user.count({
         where: { email },
+      });
+      return count > 0;
+    },
+
+    /**
+     * Check if email already exists in a specific clinic
+     */
+    async emailExistsInClinic(email: string, clinicId: string): Promise<boolean> {
+      const count = await prisma.user.count({
+        where: { email, clinicId },
       });
       return count > 0;
     },

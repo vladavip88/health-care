@@ -19,6 +19,13 @@ export interface GetUserArgs {
 export function createUserQueries(service: UserService) {
   return {
     /**
+     * Get the currently authenticated user with clinic info
+     */
+    currentUser: async (_parent: unknown, _args: unknown, context: Context) => {
+      return service.getCurrentUser(context as AuthenticatedContext);
+    },
+
+    /**
      * Get a single user by ID
      */
     user: async (_parent: unknown, args: GetUserArgs, context: Context) => {

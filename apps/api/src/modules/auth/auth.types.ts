@@ -41,6 +41,29 @@ export interface AuthTokens {
 }
 
 /**
+ * Clinic info in login response
+ */
+export interface LoginClinicInfo {
+  id: string;
+  name: string;
+}
+
+/**
+ * Login response with user and clinics list
+ */
+export interface LoginResponse {
+  user: {
+    id: string;
+    email: string;
+    firstName?: string | null;
+    lastName?: string | null;
+    role: Role;
+    clinicId: string;
+  };
+  clinics: LoginClinicInfo[];
+}
+
+/**
  * Auth response with user data and tokens
  */
 export interface AuthResponse {

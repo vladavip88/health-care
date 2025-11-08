@@ -156,13 +156,10 @@ export const clinicSchema = gql`
 
   extend type Mutation {
     """
-    Create a new clinic (restricted)
-    Currently disabled - clinics created during onboarding
+    Create a new clinic (public)
+    Used during onboarding/registration
     """
     createClinic(input: CreateClinicInput!): Clinic!
-      @auth
-      @hasRole(roles: ["CLINIC_ADMIN"])
-      @hasPermission(permission: "clinic:create")
 
     """
     Update clinic settings

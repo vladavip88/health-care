@@ -8,10 +8,10 @@ import type { Context, AuthenticatedContext } from '../../common/types/context';
 export function createClinicMutations(service: ClinicService) {
   return {
     /**
-     * Create a new clinic (restricted)
+     * Create a new clinic (public - used during onboarding)
      */
-    createClinic: async (_parent: unknown, args: CreateClinicInput, context: Context) => {
-      return service.createClinic(args, context as AuthenticatedContext);
+    createClinic: async (_parent: unknown, { input }: { input: CreateClinicInput }, context: Context) => {
+      return service.createClinic(input, context);
     },
 
     /**

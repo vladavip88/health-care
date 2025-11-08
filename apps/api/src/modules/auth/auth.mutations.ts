@@ -17,11 +17,19 @@ export function createAuthMutations(service: AuthService) {
     },
 
     /**
-     * Login user
+     * Login user - returns user and list of available clinics
      * Public mutation - no authentication required
      */
     login: async (_parent: unknown, args: { input: LoginInput }, context: Context) => {
       return service.login(args.input, context);
+    },
+
+    /**
+     * Select clinic and finalize login
+     * Public mutation - no authentication required
+     */
+    selectClinic: async (_parent: unknown, args: { email: string; password: string; clinicId: string }, context: Context) => {
+      return service.selectClinic(args.email, args.password, args.clinicId, context);
     },
 
     /**

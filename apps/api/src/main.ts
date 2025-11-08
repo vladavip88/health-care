@@ -1,6 +1,8 @@
 import { ApolloServer } from '@apollo/server';
-import { startStandaloneServer } from '@apollo/server/standalone';
 import { makeExecutableSchema } from '@graphql-tools/schema';
+import express, { type Request, type Response } from 'express';
+import cors from 'cors';
+import { json } from 'body-parser';
 import { prisma } from './lib/prisma';
 import { typeDefs } from './graphql/schema';
 import { resolvers } from './graphql/resolvers';
@@ -48,19 +50,44 @@ const server = new ApolloServer<Context>({
   schema,
 });
 
-// Start function to initialize Apollo Server
+// Start function to initialize Apollo Server with Express
 async function startServer() {
-  const { url } = await startStandaloneServer(server, {
-    listen: { port },
-    context: async ({ req }): Promise<Context> => {
+  const app = express();
+
+  // Configure CORS - allow all origins for development
+  app.use(
+    cors({
+      origin: function (origin, callback) {
+        // Allow requests with no origin (like mobile apps or curl requests)
+        if (!origin) return callback(null, true);
+        callback(null, true);
+      },
+      credentials: true,
+      methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+      allowedHeaders: ['Content-Type', 'Authorization'],
+      optionsSuccessStatus: 200,
+    })
+  );
+
+  // Parse JSON bodies
+  app.use(json());
+
+  // Start Apollo Server
+  await server.start();
+
+  // Handle GraphQL requests
+  app.post('/graphql', async (req: Request, res: Response) => {
+    try {
+      const body = req.body as { query: string; variables?: Record<string, unknown>; operationName?: string };
+
       // Authenticate user from Authorization header
-      const user = await authenticateUser(req.headers.authorization);
+      const user = await authenticateUser(req.headers.authorization as string);
 
       // Initialize audit log repository
       const auditRepo = auditLogRepository(prisma);
 
       // Initialize all DataLoaders (unique per request)
-      return {
+      const context: Context = {
         prisma,
         user: user || undefined,
         clinicId: user?.clinicId,
@@ -101,16 +128,45 @@ async function startServer() {
           },
         },
       };
-    },
+
+      // Execute GraphQL query
+      const result = await server.executeOperation(
+        {
+          query: body.query,
+          variables: body.variables,
+          operationName: body.operationName,
+        },
+        { contextValue: context }
+      );
+
+      // Extract the actual GraphQL result from the Apollo response
+      if (result.body.kind === 'single') {
+        res.json(result.body.singleResult);
+      } else {
+        res.json(result);
+      }
+    } catch (error) {
+      console.error('GraphQL error:', error);
+      res.status(500).json({ errors: [{ message: 'Internal Server Error' }] });
+    }
   });
 
-  console.log(`[ ready ] ${url}`);
-  console.log(`[ graphql ] ${url}`);
+  // Handle GET requests for health check
+  app.get('/health', (req: Request, res: Response) => {
+    res.json({ status: 'ok' });
+  });
+
+  // Start Express server
+  const httpServer = app.listen(port, () => {
+    console.log(`[ ready ] http://localhost:${port}`);
+    console.log(`[ graphql ] http://localhost:${port}/graphql`);
+  });
 
   // Graceful shutdown
   process.on('SIGINT', async () => {
     console.log('Shutting down gracefully...');
     await server.stop();
+    httpServer.close();
     await prisma.$disconnect();
     process.exit(0);
   });
@@ -118,6 +174,7 @@ async function startServer() {
   process.on('SIGTERM', async () => {
     console.log('Shutting down gracefully...');
     await server.stop();
+    httpServer.close();
     await prisma.$disconnect();
     process.exit(0);
   });

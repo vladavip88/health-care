@@ -1,7 +1,7 @@
 import { GraphQLError } from 'graphql';
 import type { Clinic } from '@prisma/client';
-import type { ClinicRepository, ClinicFilters } from './clinic.repository';
-import type { AuthenticatedContext } from '../../common/types/context';
+import type { ClinicRepository, ClinicFilters, CreateClinicData } from './clinic.repository';
+import type { AuthenticatedContext, Context } from '../../common/types/context';
 import { PERMISSIONS } from '../../common/auth/permissions';
 
 export interface CreateClinicInput {
@@ -137,22 +137,10 @@ export function createClinicService(repository: ClinicRepository) {
      * This would typically be done during registration/onboarding
      * For now, restricted to prevent unauthorized clinic creation
      */
-    async createClinic(input: CreateClinicInput, context: AuthenticatedContext): Promise<Clinic> {
-      if (!context.user) {
-        throw new GraphQLError('Unauthorized: User not authenticated', {
-          extensions: { code: 'UNAUTHENTICATED' },
-        });
-      }
-
-      // Only platform admins should create clinics
-      // For now, we'll restrict this entirely
-      throw new GraphQLError('Forbidden: Clinic creation is restricted', {
-        extensions: { code: 'FORBIDDEN' },
-      });
-
-      // Future implementation:
-      // const clinicData: CreateClinicData = { ...input };
-      // return repository.create(clinicData);
+    async createClinic(input: CreateClinicInput, context: Context): Promise<Clinic> {
+      // Allow clinic creation during onboarding (no auth required)
+      const clinicData: CreateClinicData = { ...input };
+      return repository.create(clinicData);
     },
 
     /**
