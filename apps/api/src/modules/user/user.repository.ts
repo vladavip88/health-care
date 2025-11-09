@@ -41,11 +41,16 @@ export function createUserRepository(prisma: PrismaClient) {
     },
 
     /**
-     * Find user by email
+     * Find user by email and clinic
      */
-    async findByEmail(email: string): Promise<User | null> {
+    async findByEmail(email: string, clinicId: string): Promise<User | null> {
       return prisma.user.findUnique({
-        where: { email },
+        where: {
+          email_clinicId: {
+            email,
+            clinicId,
+          },
+        },
       });
     },
 
@@ -123,11 +128,14 @@ export function createUserRepository(prisma: PrismaClient) {
     },
 
     /**
-     * Check if user exists by email
+     * Check if user exists by email and clinic
      */
-    async existsByEmail(email: string): Promise<boolean> {
+    async existsByEmail(email: string, clinicId: string): Promise<boolean> {
       const count = await prisma.user.count({
-        where: { email },
+        where: {
+          email,
+          clinicId,
+        },
       });
       return count > 0;
     },

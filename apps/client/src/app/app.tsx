@@ -12,6 +12,10 @@ import Login from '../pages/Login/Login';
 import Register from '../pages/Register/Register';
 import ClinicSelection from '../pages/ClinicSelection/ClinicSelection';
 import Dashboard from '../pages/Dashboard/Dashboard';
+import Appointments from '../pages/Appointments/Appointments';
+import Doctors from '../pages/Doctors/Doctors';
+import Patients from '../pages/Patients/Patients';
+import Assistants from '../pages/Assistants/Assistants';
 
 export function App() {
   return (
@@ -55,6 +59,10 @@ export function App() {
             }
           >
             <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/appointments" element={<Appointments />} />
+            <Route path="/doctors" element={<Doctors />} />
+            <Route path="/patients" element={<Patients />} />
+            <Route path="/assistants" element={<Assistants />} />
           </Route>
 
           {/* Redirect root to dashboard if authenticated, otherwise to login */}

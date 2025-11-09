@@ -135,10 +135,10 @@ export function createUserService(repository: UserRepository) {
         });
       }
 
-      // Check if email already exists
-      const existingUser = await repository.findByEmail(input.email);
+      // Check if email already exists in this clinic
+      const existingUser = await repository.findByEmail(input.email, context.clinicId);
       if (existingUser) {
-        throw new GraphQLError('Email already in use', {
+        throw new GraphQLError('Email already in use in this clinic', {
           extensions: { code: 'BAD_USER_INPUT' },
         });
       }

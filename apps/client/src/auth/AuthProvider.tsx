@@ -1,6 +1,7 @@
 import { createContext, useEffect, useState, ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCurrentUser } from '../apollo/hooks/useCurrentUser';
+import { useLogout as useLogoutMutation } from '../apollo/hooks/useLogout';
 
 interface Clinic {
   id: string;
@@ -52,6 +53,9 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   // Fetch user and clinic data from API
   const { user: fetchedUser, clinic: fetchedClinic, loading: userLoading, error: userError, refetch } = useCurrentUser();
 
+  // Logout mutation
+  const { logout: logoutMutation } = useLogoutMutation();
+
   useEffect(() => {
     // If there's an access token, try to fetch user data
     const accessToken = localStorage.getItem('accessToken');
@@ -85,13 +89,27 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     }
   }, [fetchedUser, fetchedClinic, userLoading, userError, tokenCheckId]);
 
-  const logout = () => {
-    setIsAuthenticated(false);
-    setUser(null);
-    setClinic(null);
-    localStorage.removeItem('accessToken');
-    localStorage.removeItem('refreshToken');
-    navigate('/login', { replace: true });
+  const logout = async () => {
+    try {
+      // Get refresh token before clearing localStorage
+      const refreshToken = localStorage.getItem('refreshToken');
+
+      // Call logout API mutation if refresh token exists
+      if (refreshToken) {
+        await logoutMutation(refreshToken);
+      }
+    } catch (error) {
+      console.error('Logout API call failed:', error);
+      // Continue with local logout even if API call fails
+    } finally {
+      // Always clear local state and storage
+      setIsAuthenticated(false);
+      setUser(null);
+      setClinic(null);
+      localStorage.removeItem('accessToken');
+      localStorage.removeItem('refreshToken');
+      navigate('/login', { replace: true });
+    }
   };
 
   const value: AuthContextType = {

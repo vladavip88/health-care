@@ -160,22 +160,30 @@ export function createAuthService(repository: AuthRepository) {
         });
       }
 
-      // Verify password against first user (all have same password for same email)
-      const firstUser = users[0];
-      const isPasswordValid = await this.comparePassword(input.password, firstUser.passwordHash);
-      if (!isPasswordValid) {
+      // Verify password against each user (each account may have different passwords)
+      const validUsers = await Promise.all(
+        users.map(async (user) => {
+          const isValid = await this.comparePassword(input.password, user.passwordHash);
+          return isValid ? user : null;
+        })
+      ).then((results) => results.filter((u) => u !== null));
+
+      if (validUsers.length === 0) {
         throw new GraphQLError('Invalid credentials', {
           extensions: { code: 'UNAUTHENTICATED' },
         });
       }
 
-      // Check if at least one user is active
-      const activeUser = users.find((u) => u.active);
+      // Check if at least one valid user is active
+      const activeUser = validUsers.find((u) => u.active);
       if (!activeUser) {
         throw new GraphQLError('Account is deactivated', {
           extensions: { code: 'FORBIDDEN' },
         });
       }
+
+      // Use the first valid user for the response
+      const firstUser = validUsers[0];
 
       // Audit log
       await ctx?.audit?.log({
@@ -186,11 +194,11 @@ export function createAuthService(repository: AuthRepository) {
         entityId: firstUser.id,
         metadata: {
           email: firstUser.email,
-          clinicsCount: users.length,
+          clinicsCount: validUsers.length,
         },
       });
 
-      // Return user and clinics list
+      // Return user and clinics list (only clinics where password matches)
       return {
         user: {
           id: firstUser.id,
@@ -200,7 +208,7 @@ export function createAuthService(repository: AuthRepository) {
           role: firstUser.role,
           clinicId: firstUser.clinicId,
         },
-        clinics: users.map((u) => ({
+        clinics: validUsers.map((u) => ({
           id: u.clinicId,
           name: u.clinic?.name || 'Unknown Clinic',
         })),

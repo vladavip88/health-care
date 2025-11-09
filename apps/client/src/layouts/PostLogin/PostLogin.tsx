@@ -1,16 +1,42 @@
-import { Outlet } from 'react-router-dom';
-import { AppShell, Header, Group, Title, Button, Container, Text, Avatar, Menu } from '@mantine/core';
-import { IconLogout } from '@tabler/icons-react';
+import { Outlet, useLocation, useNavigate } from 'react-router-dom';
+import {
+  AppShell,
+  Group,
+  Title,
+  Text,
+  Avatar,
+  Menu,
+  NavLink,
+} from '@mantine/core';
+import {
+  IconLogout,
+  IconDashboard,
+  IconCalendar,
+  IconStethoscope,
+  IconUsers,
+  IconNurse,
+} from '@tabler/icons-react';
 import { useAuth } from '../../auth/useAuth';
 import styles from './PostLogin.module.scss';
 
 export function PostLogin() {
   // Get user and clinic from auth context
   const { user, clinic, logout } = useAuth();
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  const navItems = [
+    { path: '/dashboard', label: 'Dashboard', icon: IconDashboard },
+    { path: '/appointments', label: 'Appointments', icon: IconCalendar },
+    { path: '/patients', label: 'Patients', icon: IconUsers },
+    { path: '/doctors', label: 'Doctors', icon: IconStethoscope },
+    { path: '/assistants', label: 'Assistants', icon: IconNurse },
+  ];
 
   return (
     <AppShell
       header={{ height: 70 }}
+      navbar={{ width: 250, breakpoint: 'sm' }}
       padding="md"
       styles={{
         main: {
@@ -19,7 +45,11 @@ export function PostLogin() {
       }}
     >
       <AppShell.Header p="md">
-        <Group justify="space-between" align="center" style={{ height: '100%' }}>
+        <Group
+          justify="space-between"
+          align="center"
+          style={{ height: '100%' }}
+        >
           <Title order={2} className={styles.logo}>
             Healthcare App
           </Title>
@@ -64,10 +94,26 @@ export function PostLogin() {
         </Group>
       </AppShell.Header>
 
+      <AppShell.Navbar p="md">
+        {navItems.map((item) => (
+          <NavLink
+            key={item.path}
+            label={item.label}
+            leftSection={<item.icon size={20} stroke={1.5} />}
+            active={location.pathname === item.path}
+            onClick={() => navigate(item.path)}
+            styles={{
+              root: {
+                borderRadius: '8px',
+                marginBottom: '4px',
+              },
+            }}
+          />
+        ))}
+      </AppShell.Navbar>
+
       <AppShell.Main>
-        <Container size="lg" py="md">
-          <Outlet context={{ user, clinic }} />
-        </Container>
+        <Outlet context={{ user, clinic }} />
       </AppShell.Main>
     </AppShell>
   );
