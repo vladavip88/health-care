@@ -15,21 +15,23 @@ import { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-node/
  */
 type Documents = {
     "\n  mutation CreateClinic($input: CreateClinicInput!) {\n    createClinic(input: $input) {\n      id\n      name\n      legalName\n      email\n      phone\n      address\n      city\n      country\n      timezone\n      website\n      createdAt\n      updatedAt\n    }\n  }\n": typeof types.CreateClinicDocument,
+    "\n  mutation CreatePatient($data: CreatePatientInput!) {\n    createPatient(data: $data) {\n      id\n      firstName\n      lastName\n      email\n      phone\n      dob\n      gender\n      address\n      city\n      country\n      notes\n      createdAt\n      updatedAt\n    }\n  }\n": typeof types.CreatePatientDocument,
     "\n  mutation Login($input: LoginInput!) {\n    login(input: $input) {\n      user {\n        id\n        email\n        firstName\n        lastName\n        role\n        clinicId\n      }\n      clinics {\n        id\n        name\n      }\n    }\n  }\n": typeof types.LoginDocument,
     "\n  mutation Logout($refreshToken: String!) {\n    logout(refreshToken: $refreshToken)\n  }\n": typeof types.LogoutDocument,
     "\n  mutation Register($input: RegisterInput!) {\n    register(input: $input) {\n      user {\n        id\n        email\n        firstName\n        lastName\n        role\n        clinicId\n      }\n      tokens {\n        accessToken\n        refreshToken\n      }\n    }\n  }\n": typeof types.RegisterDocument,
     "\n  mutation RegisterCompany($input: RegisterCompanyInput!) {\n    registerCompany(input: $input) {\n      user {\n        id\n        email\n        firstName\n        lastName\n        role\n        clinicId\n      }\n      tokens {\n        accessToken\n        refreshToken\n      }\n    }\n  }\n": typeof types.RegisterCompanyDocument,
     "\n  query CurrentUser {\n    currentUser {\n      id\n      email\n      firstName\n      lastName\n      role\n      clinicId\n      clinic {\n        id\n        name\n        legalName\n        email\n        phone\n        address\n        city\n        country\n        timezone\n        website\n        createdAt\n        updatedAt\n      }\n    }\n  }\n": typeof types.CurrentUserDocument,
-    "\n  query GetPatients {\n    patients {\n      id\n      firstName\n      lastName\n      email\n    }\n  }\n": typeof types.GetPatientsDocument,
+    "\n  query GetPatients($pagination: PaginationInput) {\n    patients(pagination: $pagination) {\n      items {\n        id\n        firstName\n        lastName\n        email\n        phone\n        dob\n        gender\n        createdAt\n      }\n      total\n      skip\n      take\n      hasMore\n    }\n  }\n": typeof types.GetPatientsDocument,
 };
 const documents: Documents = {
     "\n  mutation CreateClinic($input: CreateClinicInput!) {\n    createClinic(input: $input) {\n      id\n      name\n      legalName\n      email\n      phone\n      address\n      city\n      country\n      timezone\n      website\n      createdAt\n      updatedAt\n    }\n  }\n": types.CreateClinicDocument,
+    "\n  mutation CreatePatient($data: CreatePatientInput!) {\n    createPatient(data: $data) {\n      id\n      firstName\n      lastName\n      email\n      phone\n      dob\n      gender\n      address\n      city\n      country\n      notes\n      createdAt\n      updatedAt\n    }\n  }\n": types.CreatePatientDocument,
     "\n  mutation Login($input: LoginInput!) {\n    login(input: $input) {\n      user {\n        id\n        email\n        firstName\n        lastName\n        role\n        clinicId\n      }\n      clinics {\n        id\n        name\n      }\n    }\n  }\n": types.LoginDocument,
     "\n  mutation Logout($refreshToken: String!) {\n    logout(refreshToken: $refreshToken)\n  }\n": types.LogoutDocument,
     "\n  mutation Register($input: RegisterInput!) {\n    register(input: $input) {\n      user {\n        id\n        email\n        firstName\n        lastName\n        role\n        clinicId\n      }\n      tokens {\n        accessToken\n        refreshToken\n      }\n    }\n  }\n": types.RegisterDocument,
     "\n  mutation RegisterCompany($input: RegisterCompanyInput!) {\n    registerCompany(input: $input) {\n      user {\n        id\n        email\n        firstName\n        lastName\n        role\n        clinicId\n      }\n      tokens {\n        accessToken\n        refreshToken\n      }\n    }\n  }\n": types.RegisterCompanyDocument,
     "\n  query CurrentUser {\n    currentUser {\n      id\n      email\n      firstName\n      lastName\n      role\n      clinicId\n      clinic {\n        id\n        name\n        legalName\n        email\n        phone\n        address\n        city\n        country\n        timezone\n        website\n        createdAt\n        updatedAt\n      }\n    }\n  }\n": types.CurrentUserDocument,
-    "\n  query GetPatients {\n    patients {\n      id\n      firstName\n      lastName\n      email\n    }\n  }\n": types.GetPatientsDocument,
+    "\n  query GetPatients($pagination: PaginationInput) {\n    patients(pagination: $pagination) {\n      items {\n        id\n        firstName\n        lastName\n        email\n        phone\n        dob\n        gender\n        createdAt\n      }\n      total\n      skip\n      take\n      hasMore\n    }\n  }\n": types.GetPatientsDocument,
 };
 
 /**
@@ -53,6 +55,10 @@ export function gql(source: "\n  mutation CreateClinic($input: CreateClinicInput
 /**
  * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
+export function gql(source: "\n  mutation CreatePatient($data: CreatePatientInput!) {\n    createPatient(data: $data) {\n      id\n      firstName\n      lastName\n      email\n      phone\n      dob\n      gender\n      address\n      city\n      country\n      notes\n      createdAt\n      updatedAt\n    }\n  }\n"): (typeof documents)["\n  mutation CreatePatient($data: CreatePatientInput!) {\n    createPatient(data: $data) {\n      id\n      firstName\n      lastName\n      email\n      phone\n      dob\n      gender\n      address\n      city\n      country\n      notes\n      createdAt\n      updatedAt\n    }\n  }\n"];
+/**
+ * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
 export function gql(source: "\n  mutation Login($input: LoginInput!) {\n    login(input: $input) {\n      user {\n        id\n        email\n        firstName\n        lastName\n        role\n        clinicId\n      }\n      clinics {\n        id\n        name\n      }\n    }\n  }\n"): (typeof documents)["\n  mutation Login($input: LoginInput!) {\n    login(input: $input) {\n      user {\n        id\n        email\n        firstName\n        lastName\n        role\n        clinicId\n      }\n      clinics {\n        id\n        name\n      }\n    }\n  }\n"];
 /**
  * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
@@ -73,7 +79,7 @@ export function gql(source: "\n  query CurrentUser {\n    currentUser {\n      i
 /**
  * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function gql(source: "\n  query GetPatients {\n    patients {\n      id\n      firstName\n      lastName\n      email\n    }\n  }\n"): (typeof documents)["\n  query GetPatients {\n    patients {\n      id\n      firstName\n      lastName\n      email\n    }\n  }\n"];
+export function gql(source: "\n  query GetPatients($pagination: PaginationInput) {\n    patients(pagination: $pagination) {\n      items {\n        id\n        firstName\n        lastName\n        email\n        phone\n        dob\n        gender\n        createdAt\n      }\n      total\n      skip\n      take\n      hasMore\n    }\n  }\n"): (typeof documents)["\n  query GetPatients($pagination: PaginationInput) {\n    patients(pagination: $pagination) {\n      items {\n        id\n        firstName\n        lastName\n        email\n        phone\n        dob\n        gender\n        createdAt\n      }\n      total\n      skip\n      take\n      hasMore\n    }\n  }\n"];
 
 export function gql(source: string) {
   return (documents as any)[source] ?? {};

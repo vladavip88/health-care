@@ -4,6 +4,7 @@ import { createTheme, MantineProvider } from '@mantine/core';
 import { Notifications } from '@mantine/notifications';
 import '@mantine/core/styles.css';
 import '@mantine/notifications/styles.css';
+import '@mantine/dates/styles.css';
 import * as ReactDOM from 'react-dom/client';
 import App from './app/app';
 

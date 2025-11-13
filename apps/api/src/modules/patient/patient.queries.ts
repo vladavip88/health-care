@@ -7,15 +7,19 @@ export interface PatientsArgs {
     email?: string;
     phone?: string;
   };
+  pagination?: {
+    skip?: number;
+    take?: number;
+  };
 }
 
 export const patientQueries = {
   /**
-   * Get all patients in the clinic or search
+   * Get all patients in the clinic or search with pagination
    * Accessible by: CLINIC_ADMIN, DOCTOR (own patients only), ASSISTANT
    */
-  patients: async (_: any, { search }: PatientsArgs, ctx: Context) => {
-    return patientService(ctx as AuthenticatedContext).list(search);
+  patients: async (_: any, { search, pagination }: PatientsArgs, ctx: Context) => {
+    return patientService(ctx as AuthenticatedContext).list(search, pagination);
   },
 
   /**

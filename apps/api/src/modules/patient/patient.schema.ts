@@ -57,8 +57,21 @@ export default gql`
     phone: String
   }
 
+  input PaginationInput {
+    skip: Int
+    take: Int
+  }
+
+  type PaginatedPatients {
+    items: [Patient!]!
+    total: Int!
+    skip: Int!
+    take: Int!
+    hasMore: Boolean!
+  }
+
   type Query {
-    patients(search: PatientSearchInput): [Patient!]!
+    patients(search: PatientSearchInput, pagination: PaginationInput): PaginatedPatients!
       @auth
       @hasRole(roles: ["CLINIC_ADMIN", "DOCTOR", "ASSISTANT"])
 

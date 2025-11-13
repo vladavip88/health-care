@@ -15,6 +15,7 @@ import Dashboard from '../pages/Dashboard/Dashboard';
 import Appointments from '../pages/Appointments/Appointments';
 import Doctors from '../pages/Doctors/Doctors';
 import Patients from '../pages/Patients/Patients';
+import CreatePatient from '../pages/CreatePatient/CreatePatient';
 import Assistants from '../pages/Assistants/Assistants';
 
 export function App() {
@@ -61,6 +62,7 @@ export function App() {
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/appointments" element={<Appointments />} />
             <Route path="/doctors" element={<Doctors />} />
+            <Route path="/patients/create" element={<CreatePatient />} />
             <Route path="/patients" element={<Patients />} />
             <Route path="/assistants" element={<Assistants />} />
           </Route>

@@ -763,6 +763,20 @@ export type MutationUpdateWeeklySlotArgs = {
   id: Scalars['ID']['input'];
 };
 
+export type PaginatedPatients = {
+  __typename?: 'PaginatedPatients';
+  hasMore: Scalars['Boolean']['output'];
+  items: Array<Patient>;
+  skip: Scalars['Int']['output'];
+  take: Scalars['Int']['output'];
+  total: Scalars['Int']['output'];
+};
+
+export type PaginationInput = {
+  skip?: InputMaybe<Scalars['Int']['input']>;
+  take?: InputMaybe<Scalars['Int']['input']>;
+};
+
 export type Patient = {
   __typename?: 'Patient';
   address?: Maybe<Scalars['String']['output']>;
@@ -844,7 +858,7 @@ export type Query = {
   myPatientProfile?: Maybe<Patient>;
   myWeeklySlots: Array<WeeklySlot>;
   patient?: Maybe<Patient>;
-  patients: Array<Patient>;
+  patients: PaginatedPatients;
   reminder?: Maybe<Reminder>;
   reminderRule?: Maybe<ReminderRule>;
   reminderRules: Array<ReminderRule>;
@@ -959,6 +973,7 @@ export type QueryPatientArgs = {
 
 
 export type QueryPatientsArgs = {
+  pagination?: InputMaybe<PaginationInput>;
   search?: InputMaybe<PatientSearchInput>;
 };
 

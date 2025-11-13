@@ -35,16 +35,32 @@ interface PatientSearchInput {
   phone?: string;
 }
 
+interface PaginationInput {
+  skip?: number;
+  take?: number;
+}
+
+export interface PaginatedPatients {
+  items: any[];
+  total: number;
+  skip: number;
+  take: number;
+  hasMore: boolean;
+}
+
 export const patientService = (ctx: AuthenticatedContext) => {
   const repo = patientRepository(ctx.prisma);
 
   return {
     /**
-     * List all patients in the clinic or search
+     * List all patients in the clinic or search with pagination
      * Accessible by CLINIC_ADMIN, DOCTOR, ASSISTANT
      * DOCTOR can only see their own patients
      */
-    list: async (search?: PatientSearchInput) => {
+    list: async (search?: PatientSearchInput, pagination?: PaginationInput): Promise<PaginatedPatients> => {
+      const skip = pagination?.skip || 0;
+      const take = pagination?.take || 20;
+
       // If user is a DOCTOR, only show patients they have appointments with
       if (ctx.user.role === 'DOCTOR') {
         const doctor = await ctx.prisma.doctor.findUnique({
@@ -57,27 +73,53 @@ export const patientService = (ctx: AuthenticatedContext) => {
           });
         }
 
-        return repo.findByDoctor(doctor.id, ctx.clinicId);
+        const items = await repo.findByDoctor(doctor.id, ctx.clinicId);
+        const total = items.length;
+        const paginatedItems = items.slice(skip, skip + take);
+
+        return {
+          items: paginatedItems,
+          total,
+          skip,
+          take,
+          hasMore: skip + take < total,
+        };
       }
+
+      let items: any[] = [];
+      let total = 0;
 
       // Search if query provided
       if (search?.query) {
-        return repo.search(ctx.clinicId, search.query);
+        items = await repo.search(ctx.clinicId, search.query);
+        total = items.length;
       }
-
       // Search by email
-      if (search?.email) {
+      else if (search?.email) {
         const patient = await repo.findByEmail(ctx.clinicId, search.email);
-        return patient ? [patient] : [];
+        items = patient ? [patient] : [];
+        total = items.length;
       }
-
       // Search by phone
-      if (search?.phone) {
-        return repo.findByPhone(ctx.clinicId, search.phone);
+      else if (search?.phone) {
+        items = await repo.findByPhone(ctx.clinicId, search.phone);
+        total = items.length;
+      }
+      // Return all patients
+      else {
+        items = await repo.findManyByClinic(ctx.clinicId);
+        total = items.length;
       }
 
-      // Return all patients
-      return repo.findManyByClinic(ctx.clinicId);
+      const paginatedItems = items.slice(skip, skip + take);
+
+      return {
+        items: paginatedItems,
+        total,
+        skip,
+        take,
+        hasMore: skip + take < total,
+      };
     },
 
     /**
