@@ -1,7 +1,7 @@
 import type { Role } from '@prisma/client';
 
 /**
- * Registration input data
+ * Registration input data (for registering in existing clinic)
  */
 export interface RegisterInput {
   email: string;
@@ -11,6 +11,18 @@ export interface RegisterInput {
   phone?: string;
   role: Role;
   clinicId: string;
+}
+
+/**
+ * Register company input data (creates clinic + user)
+ */
+export interface RegisterCompanyInput {
+  clinicName: string;
+  email: string;
+  password: string;
+  firstName: string;
+  lastName: string;
+  phone: string;
 }
 
 /**

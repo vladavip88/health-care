@@ -1,4 +1,4 @@
-import type { PrismaClient, User, Role } from '@prisma/client';
+import type { PrismaClient, User, Role, Clinic } from '@prisma/client';
 import type Redis from 'ioredis';
 import type { RefreshTokenData } from './auth.types';
 
@@ -10,6 +10,22 @@ export interface CreateUserData {
   phone?: string;
   role: Role;
   clinicId: string;
+}
+
+export interface CreateClinicData {
+  name: string;
+  legalName?: string;
+  email?: string;
+  phone?: string;
+  address?: string;
+  city?: string;
+  country?: string;
+  timezone?: string;
+  subscriptionPlan?: string;
+  subscriptionStatus?: string;
+  subscriptionUntil?: Date;
+  website?: string;
+  logoUrl?: string;
 }
 
 /**
@@ -51,6 +67,15 @@ export function createAuthRepository(prisma: PrismaClient, redis: Redis) {
     async findUserById(id: string): Promise<User | null> {
       return prisma.user.findUnique({
         where: { id },
+      });
+    },
+
+    /**
+     * Create a new clinic
+     */
+    async createClinic(data: CreateClinicData): Promise<Clinic> {
+      return prisma.clinic.create({
+        data,
       });
     },
 

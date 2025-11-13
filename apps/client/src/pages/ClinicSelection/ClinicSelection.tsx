@@ -6,12 +6,10 @@ import {
   Button,
   Text,
   Stack,
-  List,
-  ThemeIcon,
+
   Paper,
-  Card,
+  Divider,
 } from '@mantine/core';
-import { IconCheck } from '@tabler/icons-react';
 import { useSelectClinic } from '../../apollo/hooks/useSelectClinic';
 
 interface Clinic {
@@ -96,37 +94,28 @@ export function ClinicSelection() {
         </Text>
 
         <Stack gap="md" mb="lg">
-          <Card withBorder radius="md" p="md">
-            <List spacing="md">
-              {state.clinics.map((clinic) => (
-                <List.Item
-                  key={clinic.id}
-                  icon={
-                    <ThemeIcon color="blue" size={32} radius="md">
-                      <IconCheck size={16} />
-                    </ThemeIcon>
-                  }
-                >
-                  <Group justify="space-between" align="center" w="100%">
-                    <div>
-                      <Text fw={500}>{clinic.name}</Text>
-                      <Text size="sm" c="dimmed">
-                        Click to select this clinic
-                      </Text>
-                    </div>
-                    <Button
-                      onClick={() => handleClinicSelect(clinic.id)}
-                      loading={loading}
-                      disabled={loading}
-                      size="sm"
-                    >
-                      Select
-                    </Button>
-                  </Group>
-                </List.Item>
-              ))}
-            </List>
-          </Card>
+          <Divider />
+          {state.clinics.map((clinic) => (
+            <>
+            <Group justify="space-between" align="center" w="100%">
+              <div>
+                <Text fw={500}>{clinic.name}</Text>
+                <Text size="sm" c="dimmed">
+                  Click to select this clinic
+                </Text>
+              </div>
+              <Button
+                onClick={() => handleClinicSelect(clinic.id)}
+                loading={loading}
+                disabled={loading}
+                size="sm"
+              >
+                Select
+              </Button>
+            </Group>
+            <Divider />
+            </>
+          ))}
         </Stack>
 
         <Group justify="center">

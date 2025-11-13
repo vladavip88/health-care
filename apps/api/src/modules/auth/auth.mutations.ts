@@ -1,5 +1,5 @@
 import type { AuthService } from './auth.service';
-import type { RegisterInput, LoginInput } from './auth.types';
+import type { RegisterInput, LoginInput, RegisterCompanyInput } from './auth.types';
 import type { Context } from '../../common/types/context';
 
 /**
@@ -8,6 +8,14 @@ import type { Context } from '../../common/types/context';
  */
 export function createAuthMutations(service: AuthService) {
   return {
+    /**
+     * Register a new company with admin user
+     * Public mutation - no authentication required
+     */
+    registerCompany: async (_parent: unknown, args: { input: RegisterCompanyInput }, context: Context) => {
+      return service.registerCompany(args.input, context);
+    },
+
     /**
      * Register a new user
      * Public mutation - no authentication required

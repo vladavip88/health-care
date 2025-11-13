@@ -8,11 +8,11 @@ import styles from './Register.module.scss';
 
 interface RegisterFormData {
   clinicName: string;
-  firstName: string;
-  lastName: string;
   email: string;
   password: string;
-  phone?: string;
+  firstName: string;
+  lastName: string;
+  phone: string;
 }
 
 const registerSchema = yup.object().shape({
@@ -35,7 +35,7 @@ const registerSchema = yup.object().shape({
     .required('Password is required'),
   phone: yup
     .string()
-    .optional(),
+    .required('Phone number is required'),
 });
 
 export function Register() {
@@ -47,15 +47,12 @@ export function Register() {
     handleSubmit,
     formState: { errors },
   } = useForm<RegisterFormData>({
-    resolver: yupResolver(registerSchema),
+    resolver: yupResolver(registerSchema as yup.ObjectSchema<RegisterFormData>),
   });
 
   const onSubmit = async (data: RegisterFormData) => {
     try {
-      await registerUser({
-        ...data,
-        role: 'CLINIC_ADMIN',
-      });
+      await registerUser(data);
       // After successful registration with clinic creation, redirect to dashboard
       navigate('/dashboard');
     } catch (error) {
@@ -144,10 +141,14 @@ export function Register() {
             mb="md"
           />
 
-          {/* Optional Phone Section */}
+          {/* Phone Section */}
           <TextInput
-            label="Phone Number"
-            placeholder="Phone number (optional)"
+            label={
+              <span>
+                Phone Number <span style={{ color: '#ff6b6b' }}>*</span>
+              </span>
+            }
+            placeholder="Phone number"
             type="tel"
             {...register('phone')}
             error={errors.phone?.message}

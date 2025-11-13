@@ -1,29 +1,18 @@
 import { useMutation } from '@apollo/client/react';
 import { notifications } from '@mantine/notifications';
-import { REGISTER } from '../mutations/register';
-import { CREATE_CLINIC } from '../mutations/createClinic';
+import { REGISTER_COMPANY } from '../mutations/registerCompany';
 
-interface RegisterInput {
+interface RegisterCompanyInput {
   email: string;
   password: string;
-  firstName?: string;
-  lastName?: string;
-  phone?: string;
+  firstName: string;
+  lastName: string;
+  phone: string;
   clinicName: string;
-  role: string;
 }
 
-interface ClinicResponse {
-  createClinic: {
-    id: string;
-    name: string;
-    createdAt: string;
-    updatedAt: string;
-  };
-}
-
-interface AuthResponse {
-  register: {
+interface RegisterCompanyResponse {
+  registerCompany: {
     user: {
       id: string;
       email: string;
@@ -40,46 +29,29 @@ interface AuthResponse {
 }
 
 export const useRegister = () => {
-  const [createClinicMutation] = useMutation<ClinicResponse>(CREATE_CLINIC);
-  const [registerMutation, { loading }] = useMutation<AuthResponse>(REGISTER);
+  const [registerCompanyMutation, { loading }] = useMutation<RegisterCompanyResponse>(
+    REGISTER_COMPANY
+  );
 
-  const register = async (input: RegisterInput) => {
+  const register = async (input: RegisterCompanyInput) => {
     try {
-      // Step 1: Create clinic first
-      const clinicResponse = await createClinicMutation({
+      const response = await registerCompanyMutation({
         variables: {
           input: {
-            name: input.clinicName,
-          },
-        },
-      });
-
-      if (!clinicResponse.data) {
-        throw new Error('Failed to create clinic');
-      }
-
-      const clinicId = clinicResponse.data.createClinic.id;
-      const clinic = clinicResponse.data.createClinic;
-
-      // Step 2: Register user with the created clinic ID
-      const registerResponse = await registerMutation({
-        variables: {
-          input: {
+            clinicName: input.clinicName,
             email: input.email,
             password: input.password,
             firstName: input.firstName,
             lastName: input.lastName,
             phone: input.phone,
-            role: input.role,
-            clinicId,
           },
         },
       });
 
-      if (registerResponse.data) {
-        const { tokens, user } = registerResponse.data.register;
+      if (response.data) {
+        const { tokens, user } = response.data.registerCompany;
 
-        // Store only tokens in localStorage
+        // Store tokens in localStorage
         localStorage.setItem('accessToken', tokens.accessToken);
         localStorage.setItem('refreshToken', tokens.refreshToken);
 
@@ -88,7 +60,7 @@ export const useRegister = () => {
           message: 'Clinic and account created successfully!',
           color: 'green',
         });
-        return registerResponse.data.register;
+        return response.data.registerCompany;
       }
     } catch (error) {
       const errorMessage =

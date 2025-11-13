@@ -4,6 +4,7 @@ import * as jwt from 'jsonwebtoken';
 import type { AuthRepository } from './auth.repository';
 import type {
   RegisterInput,
+  RegisterCompanyInput,
   LoginInput,
   AuthResponse,
   LoginResponse,
@@ -212,6 +213,73 @@ export function createAuthService(repository: AuthRepository) {
           id: u.clinicId,
           name: u.clinic?.name || 'Unknown Clinic',
         })),
+      };
+    },
+
+    /**
+     * Register a new company with admin user
+     * Creates clinic and clinic admin user in one transaction
+     */
+    async registerCompany(input: RegisterCompanyInput, ctx?: Context): Promise<AuthResponse> {
+      // Validate input
+      if (!input.email || !input.password || !input.clinicName) {
+        throw new GraphQLError('Email, password, and clinic name are required', {
+          extensions: { code: 'BAD_USER_INPUT' },
+        });
+      }
+
+      if (input.password.length < 8) {
+        throw new GraphQLError('Password must be at least 8 characters long', {
+          extensions: { code: 'BAD_USER_INPUT' },
+        });
+      }
+
+      // Hash password
+      const passwordHash = await this.hashPassword(input.password);
+
+      // Create clinic first
+      const clinic = await repository.createClinic({
+        name: input.clinicName,
+      });
+
+      // Create user as CLINIC_ADMIN for the new clinic
+      const user = await repository.createUser({
+        email: input.email,
+        passwordHash,
+        firstName: input.firstName,
+        lastName: input.lastName,
+        phone: input.phone,
+        role: 'CLINIC_ADMIN',
+        clinicId: clinic.id,
+      });
+
+      // Generate tokens
+      const tokens = await this.generateTokenPair(user.id, user.email, user.role, user.clinicId);
+
+      // Audit log
+      await ctx?.audit?.log({
+        clinicId: clinic.id,
+        actorId: user.id,
+        action: 'auth.registerCompany',
+        entity: 'User',
+        entityId: user.id,
+        metadata: {
+          email: user.email,
+          clinicId: clinic.id,
+          clinicName: clinic.name,
+        },
+      });
+
+      return {
+        user: {
+          id: user.id,
+          email: user.email,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          role: user.role,
+          clinicId: user.clinicId,
+        },
+        tokens,
       };
     },
 

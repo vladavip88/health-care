@@ -50,7 +50,7 @@ export const authSchema = gql`
   }
 
   """
-  Registration input
+  Registration input (for registering in existing clinic)
   """
   input RegisterInput {
     email: String!
@@ -63,6 +63,18 @@ export const authSchema = gql`
   }
 
   """
+  Register company input (creates clinic + user in one step)
+  """
+  input RegisterCompanyInput {
+    clinicName: String!
+    email: String!
+    password: String!
+    firstName: String!
+    lastName: String!
+    phone: String!
+  }
+
+  """
   Login input
   """
   input LoginInput {
@@ -71,6 +83,14 @@ export const authSchema = gql`
   }
 
   extend type Mutation {
+    """
+    Register a new company with admin user
+    Public mutation - creates clinic and clinic admin user in one step
+    No authentication required
+    Password must be at least 8 characters long
+    """
+    registerCompany(input: RegisterCompanyInput!): AuthResponse!
+
     """
     Register a new user
     Public mutation - no authentication required
