@@ -11,9 +11,9 @@ export const LOGIN = gql`
         role
         clinicId
       }
-      tokens {
-        accessToken
-        refreshToken
+      clinics {
+        id
+        name
       }
     }
   }

@@ -2,6 +2,9 @@
   "name": "@healt-care/api",
   "version": "0.0.1",
   "private": true,
+  "scripts": {
+    "codegen": "graphql-codegen"
+  },
   "nx": {
     "targets": {
       "build": {

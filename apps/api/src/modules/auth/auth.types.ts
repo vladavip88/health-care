@@ -1,4 +1,5 @@
 import type { Role } from '@prisma/client';
+import type { RegisterCompanyInput as GeneratedRegisterCompanyInput } from '../../generated';
 
 /**
  * Registration input data (for registering in existing clinic)
@@ -15,15 +16,9 @@ export interface RegisterInput {
 
 /**
  * Register company input data (creates clinic + user)
+ * Note: clinicName is added by the form but not part of GraphQL input
  */
-export interface RegisterCompanyInput {
-  clinicName: string;
-  email: string;
-  password: string;
-  firstName: string;
-  lastName: string;
-  phone: string;
-}
+export type RegisterCompanyInput = GeneratedRegisterCompanyInput & { clinicName: string };
 
 /**
  * Login input data

@@ -4,16 +4,10 @@ import * as yup from 'yup';
 import { useNavigate, Link } from 'react-router-dom';
 import { TextInput, Button, Container, Title, Group, Text, PasswordInput, SimpleGrid, Paper } from '@mantine/core';
 import { useRegister } from '../../apollo/hooks/useRegister';
+import type { RegisterCompanyMutationVariables } from '../../generated/graphql';
 import styles from './Register.module.scss';
 
-interface RegisterFormData {
-  clinicName: string;
-  email: string;
-  password: string;
-  firstName: string;
-  lastName: string;
-  phone: string;
-}
+type RegisterFormData = RegisterCompanyMutationVariables['input'] & { clinicName: string };
 
 const registerSchema = yup.object().shape({
   clinicName: yup

@@ -9,24 +9,6 @@ export const createClinicLoader = (prisma: PrismaClient) =>
   new DataLoader(async (ids: readonly string[]) => {
     const clinics = await prisma.clinic.findMany({
       where: { id: { in: ids as string[] } },
-      select: {
-        id: true,
-        name: true,
-        legalName: true,
-        email: true,
-        phone: true,
-        address: true,
-        city: true,
-        country: true,
-        timezone: true,
-        subscriptionPlan: true,
-        subscriptionStatus: true,
-        subscriptionUntil: true,
-        website: true,
-        logoUrl: true,
-        createdAt: true,
-        updatedAt: true,
-      },
     });
 
     const clinicMap = new Map(clinics.map((c) => [c.id, c]));

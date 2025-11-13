@@ -1,39 +1,16 @@
 import { useMutation } from '@apollo/client/react';
 import { notifications } from '@mantine/notifications';
 import { REGISTER_COMPANY } from '../mutations/registerCompany';
+import type { RegisterCompanyMutation, RegisterCompanyMutationVariables } from '../../generated/graphql';
 
-interface RegisterCompanyInput {
-  email: string;
-  password: string;
-  firstName: string;
-  lastName: string;
-  phone: string;
-  clinicName: string;
-}
-
-interface RegisterCompanyResponse {
-  registerCompany: {
-    user: {
-      id: string;
-      email: string;
-      firstName?: string;
-      lastName?: string;
-      role: string;
-      clinicId: string;
-    };
-    tokens: {
-      accessToken: string;
-      refreshToken: string;
-    };
-  };
-}
+type RegisterCompanyFormInput = RegisterCompanyMutationVariables['input'] & { clinicName: string };
 
 export const useRegister = () => {
-  const [registerCompanyMutation, { loading }] = useMutation<RegisterCompanyResponse>(
+  const [registerCompanyMutation, { loading }] = useMutation<RegisterCompanyMutation, RegisterCompanyMutationVariables>(
     REGISTER_COMPANY
   );
 
-  const register = async (input: RegisterCompanyInput) => {
+  const register = async (input: RegisterCompanyFormInput) => {
     try {
       const response = await registerCompanyMutation({
         variables: {
